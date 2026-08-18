@@ -150,3 +150,64 @@ test_that("dtlog is visible on the call stack, and that is the only trace", {
   shallow <- quiet(eval(quote(native_bracket(DT, , sys.nframe())), env))
   expect_gt(deep, shallow)
 })
+
+# ---- arguments are evaluated exactly as often as data.table evaluates them --
+
+# how often `expr` runs the counter, with dtlog and with plain data.table
+eval_counts <- function(expr) {
+  count <- function(env) {
+    env$n <- 0L
+    env$tick <- function(value) {
+      env$n <- env$n + 1L
+      value
+    }
+    loud(eval(expr, env))
+    env$n
+  }
+  list(dtlog = count(fresh_env()), native = count(fresh_env(native = TRUE)))
+}
+
+expect_evaluated_once <- function(expr) {
+  counts <- eval_counts(expr)
+  label <- paste(deparse(expr), collapse = " ")
+  testthat::expect_identical(counts$dtlog, 1L,
+                             label = paste0("dtlog evaluations of `", label, "`"))
+  testthat::expect_identical(counts$dtlog, counts$native,
+                             label = paste0("evaluations of `", label, "`"))
+}
+
+test_that("fread() and fwrite() evaluate their arguments only once", {
+  # a side effecting expression must run as often as it would without dtlog:
+  # building a log message is not a reason to compute an argument again
+  expect_evaluated_once(quote(fread(input = tick("a,b\n1,2\n3,4"))))
+  expect_evaluated_once(quote(fread(file = tick(write_csv(TMPFILE)))))
+  expect_evaluated_once(quote(fwrite(OTHER, file = tick(TMPFILE))))
+  expect_evaluated_once(quote(fwrite(OTHER, TMPFILE, append = tick(TRUE))))
+  expect_evaluated_once(quote(fwrite(tick(OTHER), TMPFILE)))
+})
+
+test_that("fwrite() logs the file it actually wrote", {
+  path <- tempfile(fileext = ".csv")
+  paths <- character()
+  env <- fresh_env()
+  env$new_path <- function() {
+    paths <<- c(paths, path)
+    path
+  }
+  messages <- loud(eval(quote(fwrite(OTHER, file = new_path())), env))
+
+  expect_length(paths, 1L)
+  expect_true(file.exists(path))
+  expect_match(messages, basename(path), fixed = TRUE, all = FALSE)
+})
+
+test_that("fread() does not print the data as if it were a file name", {
+  env <- fresh_env()
+  messages <- loud(eval(quote(fread("a,b\n1,2\n3,4")), env))
+  expect_identical(messages, "fread: read 2 rows and 2 columns")
+
+  # a real path is still named
+  path <- eval(quote(write_csv(TMPFILE)), env)
+  messages <- loud(eval(quote(fread(TMPFILE)), env))
+  expect_match(messages, sprintf("from '%s'", basename(path)), fixed = TRUE)
+})

@@ -1,5 +1,3 @@
-`%||%` <- function(x, y) if (is.null(x)) y else x
-
 # ---- entry point -----------------------------------------------------------
 
 log_bracket <- function(x, out, info, before) {
@@ -20,7 +18,7 @@ log_assign <- function(x, info, before) {
   added <- setdiff(after_names, before$names)
   dropped <- setdiff(before$names, after_names)
   prefix <- if (info$has_by) {
-    sprintf("mutate (by %s): ", format_list(by_vars(info)))
+    sprintf("mutate (by %s): ", format_list(by_vars(info, before$names)))
   } else {
     "mutate: "
   }
@@ -122,14 +120,15 @@ row_change <- function(before_n, after_n) {
 # ---- i / j / by ------------------------------------------------------------
 
 log_subset <- function(x, out, info, before) {
+  selection <- j_is_selection(x, info)
   # when j aggregates, the number of rows in the result says nothing about how
   # many rows i selected, so the two are reported together instead
   aggregated <- info$has_by ||
-    (info$has_j && !j_is_selection(x, info) && nrow(out) != before$nrow)
+    (info$has_j && !selection && nrow(out) != before$nrow)
   if (info$has_i && !aggregated) log_i(out, info, before)
-  if (info$has_by) log_group_by(info)
+  if (info$has_by) log_group_by(info, before$names)
   if (aggregated) return(log_summarize(out, info, before))
-  if (info$has_j) log_j(x, out, info, before)
+  if (info$has_j) log_j(x, out, info, before, selection)
   invisible(NULL)
 }
 
@@ -172,8 +171,8 @@ log_i <- function(out, info, before) {
   ))
 }
 
-log_group_by <- function(info) {
-  vars <- by_vars(info)
+log_group_by <- function(info, nms = character()) {
+  vars <- by_vars(info, nms)
   display(sprintf(
     "group_by: %s (%s)", plural(length(vars), "grouping variable"), format_list(vars)
   ))
@@ -188,7 +187,7 @@ log_summarize <- function(out, info, before) {
   ))
 }
 
-log_j <- function(x, out, info, before) {
+log_j <- function(x, out, info, before, selection = j_is_selection(x, info)) {
   old <- before$names
   new <- names(out)
   dropped <- setdiff(old, new)
@@ -218,14 +217,19 @@ log_j <- function(x, out, info, before) {
       }
     }
   }
+  # a j that only picks existing columns is a select, even when it happens to
+  # keep all of them: reporting that as "mutate" would suggest that values
+  # were computed. The case where it drops columns is handled above.
   prefix <- if (length(added) && !length(intersect(old, new))) {
     "transmute: "
+  } else if (selection && !length(added) && !length(dropped)) {
+    "select: "
   } else {
     "mutate: "
   }
   if (!length(lines)) {
     if (!identical(new, old)) {
-      lines <- list(sprintf("reordered variables (%s)", format_list(new)))
+      lines <- list(sprintf("columns reordered (%s)", format_list(new)))
     } else if (!info$has_i) {
       lines <- list("no changes")
     } else {
@@ -240,20 +244,23 @@ log_j <- function(x, out, info, before) {
 
 # ---- helpers ---------------------------------------------------------------
 
-by_vars <- function(info) {
+by_vars <- function(info, nms = character()) {
   expr <- info$by_expr
   if (is.null(expr)) return(character())
   value <- NULL
   if (is.character(expr)) {
     value <- expr
   } else if (is.name(expr)) {
-    resolved <- tryCatch(get0(as.character(expr), envir = info$pf), error = function(e) NULL)
-    value <- if (is.character(resolved)) resolved else as.character(expr)
+    value <- by_symbol(as.character(expr), nms, info$pf)
   } else if (is_call_to(expr, c(".", "list", "c"))) {
     parts <- as.list(expr)[-1L]
-    nms <- names(parts)
+    part_nms <- names(parts)
     value <- vapply(seq_along(parts), function(k) {
-      if (!is.null(nms) && nzchar(nms[k])) nms[k] else deparse_short(parts[[k]])
+      if (!is.null(part_nms) && nzchar(part_nms[k])) return(part_nms[k])
+      part <- parts[[k]]
+      # by = c("cyl", "gear") -- the strings are the column names themselves
+      if (is.character(part) && length(part) == 1L) return(part)
+      deparse_short(part)
     }, character(1L))
   } else {
     value <- deparse_short(expr)
@@ -261,13 +268,35 @@ by_vars <- function(info) {
   value
 }
 
-# `on = "cyl"` and `on = .(cyl)` should both read as `on cyl`
+# `by = cyl` groups by the column cyl whenever the table has one, and only
+# otherwise by the value of a variable cyl in the caller. That is the order
+# data.table uses -- inside by= the columns shadow the calling frame -- so
+# resolving the caller first would name the wrong columns in the message.
+by_symbol <- function(nm, nms, pf) {
+  if (nm %in% nms) return(nm)
+  resolved <- tryCatch(get0(nm, envir = pf), error = function(e) NULL)
+  if (is.character(resolved)) resolved else nm
+}
+
+# `on = "cyl"`, `on = c(x = "y")` and `on = .(cyl)` should all read as column
+# names rather than as the expression that was typed
 format_on <- function(expr) {
   value <- tryCatch(eval(expr, envir = baseenv()), error = function(e) NULL)
   if (is.character(value)) {
     nms <- names(value)
     if (!is.null(nms)) value <- ifelse(nzchar(nms), paste(nms, value, sep = " == "), value)
     return(format_list(unname(value)))
+  }
+  # `.()` is data.table's own alias for list() and does not exist outside it,
+  # so `.(cyl)` and `.(x == y)` always fail to evaluate; read the parts off the
+  # expression instead of falling back to the deparsed call.
+  if (is_call_to(expr, c(".", "list"))) {
+    parts <- as.list(expr)[-1L]
+    nms <- names(parts)
+    return(format_list(vapply(seq_along(parts), function(k) {
+      label <- deparse_short(parts[[k]])
+      if (!is.null(nms) && nzchar(nms[k])) paste(nms[k], label, sep = " == ") else label
+    }, character(1L))))
   }
   deparse_short(expr)
 }

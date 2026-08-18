@@ -34,10 +34,10 @@ produced it. `dt_log_end()` closes the transcript. Start and end are up to
 you; nothing is written before the first call or after the second.
 }
 \details{
-The file is written with plain [cat()] and is flushed after every
-operation, so it stays readable while a long script is running and survives
-a session that ends without `dt_log_end()` (only the closing line is then
-missing).
+Each operation is appended with a plain [cat()] that opens and closes the
+file again, so the transcript stays readable while a long script is running
+and survives a session that ends without `dt_log_end()` (only the closing
+line is then missing).
 }
 \examples{
 path <- tempfile(fileext = ".txt")

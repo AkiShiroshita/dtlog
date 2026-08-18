@@ -6,3 +6,6 @@
 ^dtlog_.*\.tar\.gz$
 ^LICENSE\.md$
 ^cran-comments\.md$
+^TODO\.md$
+^doc$
+^Meta$

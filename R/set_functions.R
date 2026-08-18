@@ -28,7 +28,11 @@ log_setnames <- function(out, before, cl, pf) {
     return(display(sprintf("setnames: now %s (%s)",
                            plural(length(after), "variable"), format_list(after))))
   }
-  changed <- which(after != x$names)
+  # data.table does not allow an NA column name, but a plain != would turn one
+  # into an NA index rather than into a reported change
+  same <- (is.na(after) & is.na(x$names)) |
+    (!is.na(after) & !is.na(x$names) & after == x$names)
+  changed <- which(!same)
   if (!length(changed)) return(display("setnames: no changes"))
   display(sprintf(
     "rename: renamed %s (%s)",
@@ -88,28 +92,60 @@ log_setkey <- function(fun) {
 #' @rdname set_functions
 #' @rawNamespace export("setorder")
 setorder <- function(x, ...) {
-  logged("setorder", sys.call(), parent.frame(),
-         log_setorder("setorder", "..."), args = "x")
+  order_logged("setorder", sys.call(), parent.frame(), "...")
 }
 
 #' @rdname set_functions
 #' @rawNamespace export("setorderv")
 setorderv <- function(x, ...) {
-  logged("setorderv", sys.call(), parent.frame(),
-         log_setorder("setorderv", "cols"), args = "x")
+  order_logged("setorderv", sys.call(), parent.frame(), "cols")
 }
 
-log_setorder <- function(fun, arg) {
+# setorder() sorts by reference, so the only way to tell whether it moved a row
+# is to remember the sort columns before the call. That test is exact: the sort
+# is stable, so if every sort column comes back in the same order then no row
+# moved. Columns that do not resolve to plain names -- setorder(DT, -a) -- are
+# not compared, and neither is anything under detail = "compact", which never
+# copies data; the call is then reported as a sort, as before.
+order_logged <- function(name, cl, pf, arg) {
+  if (!should_log_call(pf)) return(run_wrapped(name, cl, pf))
+  written_call <- cl
+  resolved <- try_log(resolve_arg(cl, name, "x", pf))
+  if (!is.list(resolved)) resolved <- no_arg(cl)
+  target <- resolved$value
+  cl <- resolved$cl
+  by <- try_log(order_columns(cl, name, arg, pf))
+  before <- list(x = try_log(snap(target)), by = by,
+                 cols = try_log(order_snapshot(target, by)))
+  before$.call <- written_call
+  run_wrapped(name, cl, pf, before, log_setorder(name),
+              bindings = resolved$bindings)
+}
+
+order_snapshot <- function(target, by) {
+  if (is.null(target) || !length(by) || !detail_full()) return(NULL)
+  if (!is.data.frame(target) || !all(by %in% names(target))) return(NULL)
+  lapply(stats::setNames(by, by), function(nm) data.table::copy(target[[nm]]))
+}
+
+log_setorder <- function(fun) {
   function(out, before, cl, pf) {
     x <- before$x
     if (is.null(x)) return(invisible(NULL))
-    by <- order_columns(cl, fun, arg, pf)
+    if (!is.null(before$cols) && order_unchanged(before$cols, x$obj)) {
+      return(display(sprintf("%s: no changes", fun)))
+    }
     display(sprintf(
       "arrange: sorted %s%s",
       plural(nrow(x$obj), "row"),
-      if (length(by)) sprintf(" by (%s)", format_list(by)) else ""
+      if (length(before$by)) sprintf(" by (%s)", format_list(before$by)) else ""
     ))
   }
+}
+
+order_unchanged <- function(cols, obj) {
+  all(vapply(names(cols),
+             function(nm) identical(cols[[nm]], obj[[nm]]), logical(1L)))
 }
 
 order_columns <- function(cl, fun, arg, pf) {
@@ -237,14 +273,47 @@ log_convert <- function(fun) {
 #' @rdname set_functions
 #' @rawNamespace export("setattr")
 setattr <- function(x, ...) {
-  logged("setattr", sys.call(), parent.frame(), log_setattr, args = "x")
+  attr_logged(sys.call(), parent.frame())
+}
+
+# setattr() writes one named attribute by reference. Remembering just that one
+# attribute before the call is enough to say whether it was added, replaced or
+# removed, and it is the only part of the object that the call can touch.
+attr_logged <- function(cl, pf) {
+  if (!should_log_call(pf)) return(run_wrapped("setattr", cl, pf))
+  written_call <- cl
+  resolved <- try_log(resolve_arg(cl, "setattr", "x", pf))
+  if (!is.list(resolved)) resolved <- no_arg(cl)
+  target <- resolved$value
+  cl <- resolved$cl
+  name <- try_log(eval(matched_arg(cl, "setattr", "name"), pf))
+  before <- list(x = try_log(snap(target)))
+  before$name <- if (is.character(name) && length(name) == 1L) name else NULL
+  # The attribute has to be copied, not just referenced: setattr() writes by
+  # reference, so setattr(x, "names", ...) rewrites the very vector that
+  # attr(x, "names") just handed out, and the comparison would always agree.
+  before$value <- if (is.null(before$name) || is.null(target)) NULL else
+    try_log(data.table::copy(attr(target, before$name, exact = TRUE)))
+  before$.call <- written_call
+  run_wrapped("setattr", cl, pf, before, log_setattr,
+              bindings = resolved$bindings)
 }
 
 log_setattr <- function(out, before, cl, pf) {
-  name <- tryCatch(eval(matched_arg(cl, "setattr", "name"), pf),
-                   error = function(e) NULL)
-  display(sprintf(
-    "setattr: set attribute%s by reference",
-    if (is.character(name)) sprintf(" '%s'", name) else ""
-  ))
+  name <- before$name
+  label <- if (is.null(name)) "" else sprintf(" '%s'", name)
+  if (is.null(name) || is.null(before$x)) {
+    return(display(sprintf("setattr: set attribute%s by reference", label)))
+  }
+  after <- attr(before$x$obj, name, exact = TRUE)
+  verb <- if (is.null(after) && !is.null(before$value)) {
+    "removed"
+  } else if (!is.null(after) && is.null(before$value)) {
+    "added"
+  } else if (identical(before$value, after)) {
+    return(display(sprintf("setattr: no changes to attribute%s", label)))
+  } else {
+    "changed"
+  }
+  display(sprintf("setattr: %s attribute%s by reference", verb, label))
 }

@@ -19,5 +19,5 @@ Write a data table to a file, with a log
 }
 \examples{
 dt <- data.table::data.table(a = 1:2, b = 3:4)
-data.table::fwrite(dt, tempfile())
+fwrite(dt, tempfile())
 }

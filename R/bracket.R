@@ -39,17 +39,25 @@
 }
 
 # An environment that shadows dtlog's own method with the original one from
-# data.table. It is a child of the caller's frame, so that i, j and by see
-# exactly the objects they would see without dtlog, and so that
-# data.table:::cedta() reaches the same verdict about the caller.
+# data.table. It is a child of the caller's frame, so that ordinary lexical
+# lookup in i, j and by follows the same bindings as it would without dtlog,
+# and so that data.table:::cedta() reaches the same verdict about the caller.
+#
+# Because the call is run through eval(), parent.frame() inside data.table's
+# method is this environment rather than the caller's frame. The write-back of
+# an over-allocated shallow copy still reaches the caller, because data.table
+# uses assign(name, x, parent.frame(), inherits = TRUE) and this environment
+# holds no binding of that name, so the assignment walks up into the caller's
+# frame. Simple extractions (`l$dt` and friends) are written back by reference
+# and are unaffected either way.
 #
 # The call is re-evaluated in that environment, which would evaluate the
 # expression that produced `x` a second time. For a symbol (or a simple
 # extraction such as `l$dt`) that is harmless, and data.table needs the
 # original expression: when it has to over-allocate it assigns the shallow
-# copy back to that name in the calling frame. For anything else -- a chained
-# `dt[...][...]`, a function call -- the already evaluated table is bound to a
-# placeholder instead, so that nothing is computed twice.
+# copy back to that name. For anything else -- a chained `dt[...][...]`, a
+# function call -- the already evaluated table is bound to a placeholder
+# instead, so that nothing is computed twice.
 bracket_env <- function(pf, cl, x) {
   env <- new.env(parent = pf)
   assign("[.data.table", .dt$bracket, envir = env)
@@ -70,7 +78,10 @@ eval_visible <- function(cl, env) {
 # position of the argument that data.table matches to `x`
 x_arg_index <- function(cl) arg_index(cl, "x")
 
-# data.table reassigns an over-allocated copy to expressions of this shape
+# data.table reassigns an over-allocated copy to expressions of this shape.
+# Deliberately identical to data.table:::.is_simple_extraction(); if that
+# predicate ever changes, this one has to change with it, otherwise dtlog
+# would replace an expression that data.table still needs to write back to.
 is_reference_target <- function(expr) {
   is.name(expr) ||
     (is.call(expr) && is.name(expr[[1L]]) &&

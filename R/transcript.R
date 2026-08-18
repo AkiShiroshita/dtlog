@@ -5,10 +5,10 @@
 #' produced it. `dt_log_end()` closes the transcript. Start and end are up to
 #' you; nothing is written before the first call or after the second.
 #'
-#' The file is written with plain [cat()] and is flushed after every
-#' operation, so it stays readable while a long script is running and survives
-#' a session that ends without `dt_log_end()` (only the closing line is then
-#' missing).
+#' Each operation is appended with a plain [cat()] that opens and closes the
+#' file again, so the transcript stays readable while a long script is running
+#' and survives a session that ends without `dt_log_end()` (only the closing
+#' line is then missing).
 #'
 #' @param file Path of the text file. `NULL` ends the current transcript, so
 #'   `dt_log(NULL)` is the same as `dt_log_end()`.
@@ -38,9 +38,16 @@ dt_log <- function(file = "dtlog.txt", append = FALSE, code = TRUE, echo = TRUE)
     stop("dt_log(): `append`, `code` and `echo` must be TRUE or FALSE",
          call. = FALSE)
   }
-  if (!is.null(.state$sink)) dt_log_end()
   path <- path.expand(file)
-  if (!append && file.exists(path)) file.remove(path)
+  # Make sure the new transcript can be written before the old one is closed,
+  # so that a typo in the path does not throw away a transcript that is running.
+  if (!can_write(path)) {
+    stop(sprintf("dt_log(): cannot write to '%s'", path), call. = FALSE)
+  }
+  if (!is.null(.state$sink)) dt_log_end()
+  if (!append && !truncate_file(path)) {
+    stop(sprintf("dt_log(): cannot write to '%s'", path), call. = FALSE)
+  }
   .state$sink <- list(path = path, code = isTRUE(code), echo = isTRUE(echo), n = 0L)
   write_lines(c(
     sprintf("# dtlog transcript, started %s", format(Sys.time(), "%Y-%m-%d %H:%M:%S")),
@@ -60,14 +67,18 @@ dt_log_end <- function() {
     message("dt_log: no transcript is open")
     return(invisible(NULL))
   }
-  write_lines(c("", sprintf(
+  ok <- write_lines(c("", sprintf(
     "# dtlog transcript, ended %s (%s)",
     format(Sys.time(), "%Y-%m-%d %H:%M:%S"),
     plural(sink_state$n, "operation")
   )))
   .state$sink <- NULL
-  message(sprintf("dt_log: wrote %s to '%s'",
-                  plural(sink_state$n, "operation"), sink_state$path))
+  # a failed write has already reported that the transcript was closed, and
+  # saying that it was written as well would contradict it
+  if (ok) {
+    message(sprintf("dt_log: wrote %s to '%s'",
+                    plural(sink_state$n, "operation"), sink_state$path))
+  }
   invisible(sink_state$path)
 }
 
@@ -81,8 +92,39 @@ dt_log_file <- function() {
 
 sink_active <- function() !is.null(.state$sink)
 
+# TRUE if the file can be opened for writing, without emptying it
+can_write <- function(path) {
+  con <- suppressWarnings(tryCatch(file(path, "a"), error = function(e) NULL))
+  if (is.null(con)) return(FALSE)
+  close(con)
+  TRUE
+}
+
+truncate_file <- function(path) {
+  con <- suppressWarnings(tryCatch(file(path, "w"), error = function(e) NULL))
+  if (is.null(con)) return(FALSE)
+  close(con)
+  TRUE
+}
+
+# A transcript that cannot be written to is closed rather than kept open: the
+# alternative is a warning on every operation for the rest of the session, and
+# a dt_log_end() that fails too.
 write_lines <- function(lines) {
-  cat(paste0(lines, "\n", collapse = ""), file = .state$sink$path, append = TRUE)
+  # A warning that cat() recovers from must not be read as failure, and one
+  # that precedes a real error is already covered by the message below, so
+  # warnings are suppressed rather than caught.
+  ok <- tryCatch({
+    suppressWarnings(cat(paste0(lines, "\n", collapse = ""),
+                         file = .state$sink$path, append = TRUE))
+    TRUE
+  }, error = function(e) FALSE)
+  if (!ok) {
+    path <- .state$sink$path
+    .state$sink <- NULL
+    message(sprintf("dt_log: cannot write to '%s', transcript closed", path))
+  }
+  invisible(ok)
 }
 
 # remember which call is being logged, so that the transcript can show it

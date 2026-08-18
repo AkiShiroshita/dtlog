@@ -16,6 +16,13 @@ original <- function(name) {
 # the function, in a child of the caller's frame. Non standard evaluation
 # (setkey(dt, col)), modification by reference and functions that assign back
 # into the caller's frame (setDT) therefore behave exactly as without dtlog.
+#
+# Because the call goes through eval(), parent.frame() inside data.table's
+# function is that child rather than the caller's frame. setDT() and friends
+# still reach the caller: for a symbol they use assign(..., inherits = TRUE),
+# which walks past the (empty) child into the caller's frame, and for a simple
+# extraction such as `l$dt` they write back by reference. See bracket_env(),
+# which relies on the same two properties.
 run_wrapped <- function(name, cl, pf, before = NULL, log_fn = NULL,
                         bindings = list()) {
   fun <- original(name)
@@ -40,10 +47,20 @@ run_wrapped <- function(name, cl, pf, before = NULL, log_fn = NULL,
 # into the caller; for those, pass `args` instead, and dtlog resolves those
 # arguments with resolve_arg() -- leaving the expression alone when data.table
 # needs to see it, and evaluating it exactly once otherwise.
-logged <- function(name, cl, pf, log_fn = NULL, values = NULL, args = NULL) {
+#
+# `values` and `args` can be combined: fwrite() forces `x` itself and lets
+# dtlog resolve `file` and `append`. A log function must then read those
+# arguments off `before` rather than evaluating them again, which would run a
+# side effecting expression a second time.
+#
+# `match` normalises the call with match.call() before anything else, so that
+# an argument passed positionally can be found by name. Only pass it for
+# functions that do not use substitute() on their arguments.
+logged <- function(name, cl, pf, log_fn = NULL, values = NULL, args = NULL,
+                   match = FALSE) {
   written_call <- cl
   bindings <- list()
-  if (length(values)) {
+  if (length(values) || isTRUE(match)) {
     substituted <- tryCatch({
       m <- match.call(original(name), cl)
       for (a in names(values)) {
@@ -61,17 +78,17 @@ logged <- function(name, cl, pf, log_fn = NULL, values = NULL, args = NULL) {
   }
   before <- list()
   if (length(values)) {
-    before <- try_log(lapply(values, snap))
-  } else {
-    for (a in args) {
-      resolved <- try_log(resolve_arg(cl, name, a, pf))
-      if (!is.list(resolved)) resolved <- no_arg(cl)
-      cl <- resolved$cl
-      bindings[names(resolved$bindings)] <- resolved$bindings
-      before[a] <- list(try_log(snap(resolved$value)))
-    }
+    snapped <- try_log(lapply(values, snap))
+    if (is.list(snapped)) before <- snapped
   }
-  if (is.list(before)) before$.call <- written_call
+  for (a in args) {
+    resolved <- try_log(resolve_arg(cl, name, a, pf))
+    if (!is.list(resolved)) resolved <- no_arg(cl)
+    cl <- resolved$cl
+    bindings[names(resolved$bindings)] <- resolved$bindings
+    before[a] <- list(try_log(snap(resolved$value)))
+  }
+  before$.call <- written_call
   run_wrapped(name, cl, pf, before, log_fn, bindings = bindings)
 }
 
@@ -101,7 +118,10 @@ resolve_arg <- function(cl, name, arg, pf) {
   got <- tryCatch(list(ok = TRUE, value = eval(expr, pf)),
                   error = function(e) list(ok = FALSE, value = NULL))
   if (!got$ok) return(no_arg(cl))
-  if (is_reference_target(expr)) {
+  # A constant has no side effect either, and data.table sometimes inspects the
+  # expression it was given (fread() checks all.vars(substitute(input)) before
+  # treating input= as a shell command), so leave it exactly as written.
+  if (is_reference_target(expr) || is_constant(expr)) {
     return(list(cl = cl, value = got$value, bindings = list()))
   }
   placeholder <- paste0(".dtlog_", arg)
@@ -112,10 +132,15 @@ resolve_arg <- function(cl, name, arg, pf) {
 
 no_arg <- function(cl) list(cl = cl, value = NULL, bindings = list())
 
+is_constant <- function(expr) !is.name(expr) && !is.call(expr) && !is.expression(expr)
+
 # Position of `arg` in the call as written. Only a formal that comes first can
 # be matched positionally, which is what `x` is for every function dtlog wraps
-# (several of them, such as setindex(), are declared as function(...), so
-# match.call() is no help here).
+# with args = "x" (several of them, such as setindex(), are declared as
+# function(...), so match.call() is no help here). Any other argument -- fread()
+# resolves `input` and `file`, fwrite() `file` and `append` -- can only be found
+# by name, so those wrappers have to pass match = TRUE, which names the
+# positional arguments before resolve_arg() looks for them.
 arg_index <- function(cl, arg) {
   if (length(cl) < 2L) return(NA_integer_)
   nms <- names(cl)
@@ -134,7 +159,10 @@ matched_arg <- function(cl, name, arg) {
   m[[arg]]
 }
 
-# what a table looked like before the call
+# What a table looked like before the call. Everything here is a copy except
+# `obj`, which is the table itself: after a set*() call it therefore shows the
+# new state, which is exactly what the log functions read it for (`after <-
+# names(x$obj)`). Nothing may use `obj` as the state before the call.
 snap <- function(x) {
   if (is.null(x)) return(NULL)
   list(

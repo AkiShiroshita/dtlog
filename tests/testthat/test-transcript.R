@@ -127,3 +127,99 @@ test_that("a transcript does not change what the operations return", {
     expect_parity(expr)
   }
 })
+
+# ---- a transcript that cannot be written ------------------------------------
+
+unwritable_path <- function() {
+  file.path(tempfile("no-such-dir"), "transcript.txt")
+}
+
+test_that("dt_log() to an unwritable path keeps the current transcript", {
+  env <- fresh_env()
+  path <- tempfile(fileext = ".txt")
+  dt_log(path, echo = FALSE)
+  on.exit(if (!is.null(dt_log_file())) suppressMessages(dt_log_end()), add = TRUE)
+  quiet(eval(quote(DT[mpg > 20]), env))
+
+  expect_error(dt_log(unwritable_path()), "cannot write to")
+  expect_identical(dt_log_file(), path.expand(path))
+
+  # the transcript is still usable, and closes normally
+  quiet(eval(quote(DT[cyl == 4]), env))
+  suppressMessages(dt_log_end())
+  lines <- readLines(path)
+  expect_true("> DT[mpg > 20]" %in% lines)
+  expect_true("> DT[cyl == 4]" %in% lines)
+  expect_match(lines[length(lines)], "[(]2 operations[)]$")
+})
+
+test_that("a failed dt_log() leaves no transcript open", {
+  expect_null(dt_log_file())
+  expect_error(dt_log(unwritable_path()), "cannot write to")
+  expect_null(dt_log_file())
+
+  # dtlog still works afterwards: no warning on every operation, and a new
+  # transcript can be started
+  env <- fresh_env()
+  expect_silent(quiet(eval(quote(DT[mpg > 20]), env)))
+  path <- tempfile(fileext = ".txt")
+  expect_identical(dt_log(path, echo = FALSE), path.expand(path))
+  suppressMessages(dt_log_end())
+})
+
+test_that("a transcript that becomes unwritable is closed, not left broken", {
+  env <- fresh_env()
+  dir <- tempfile("transcript-dir")
+  dir.create(dir)
+  path <- file.path(dir, "transcript.txt")
+  dt_log(path, echo = FALSE)
+  on.exit(if (!is.null(dt_log_file())) suppressMessages(dt_log_end()), add = TRUE)
+  quiet(eval(quote(DT[mpg > 20]), env))
+  unlink(dir, recursive = TRUE)
+
+  # cat()'s own "cannot open file" warning must not escape alongside it
+  warned <- FALSE
+  withCallingHandlers(
+    expect_message(quiet(eval(quote(DT[cyl == 4]), env)), "transcript closed"),
+    warning = function(w) {
+      warned <<- TRUE
+      invokeRestart("muffleWarning")
+    }
+  )
+  expect_false(warned)
+  expect_null(dt_log_file())
+  # and the analysis carries on quietly
+  expect_silent(quiet(eval(quote(DT[cyl == 6]), env)))
+})
+
+test_that("dt_log_end() does not claim to have written an unwritable file", {
+  env <- fresh_env()
+  dir <- tempfile("transcript-dir")
+  dir.create(dir)
+  path <- file.path(dir, "transcript.txt")
+  dt_log(path, echo = FALSE)
+  on.exit(if (!is.null(dt_log_file())) suppressMessages(dt_log_end()), add = TRUE)
+  quiet(eval(quote(DT[mpg > 20]), env))
+  unlink(dir, recursive = TRUE)
+
+  msgs <- testthat::capture_messages(dt_log_end())
+  expect_match(msgs, "transcript closed", all = FALSE)
+  expect_false(any(grepl("^dt_log: wrote", msgs)))
+  expect_null(dt_log_file())
+})
+
+test_that("restarting a transcript on the same path does not keep the old one", {
+  env <- fresh_env()
+  path <- tempfile(fileext = ".txt")
+  dt_log(path, echo = FALSE)
+  quiet(eval(quote(DT[mpg > 20]), env))
+  suppressMessages(dt_log(path, echo = FALSE))
+  on.exit(if (!is.null(dt_log_file())) suppressMessages(dt_log_end()), add = TRUE)
+  quiet(eval(quote(DT[cyl == 4]), env))
+  suppressMessages(dt_log_end())
+
+  lines <- readLines(path)
+  expect_match(lines[1L], "^# dtlog transcript, started")
+  expect_false("> DT[mpg > 20]" %in% lines)
+  expect_true("> DT[cyl == 4]" %in% lines)
+})

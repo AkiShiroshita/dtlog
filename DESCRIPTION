@@ -16,8 +16,10 @@ License: MIT + file LICENSE
 Encoding: UTF-8
 Depends: R (>= 3.5.0)
 Imports: data.table (>= 1.14.0), stats, utils
-Suggests: testthat (>= 3.0.0), dplyr, tidyr, tidylog, tibble
+Suggests: testthat (>= 3.0.0), dplyr, tidyr, tidylog, tibble, knitr,
+    rmarkdown
 Config/testthat/edition: 3
+VignetteBuilder: knitr
 URL: https://github.com/AkiShiroshita/dtlog
 BugReports: https://github.com/AkiShiroshita/dtlog/issues
 Config/roxygen2/version: 8.1.0

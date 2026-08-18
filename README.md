@@ -62,7 +62,6 @@ setkey(dt, cyl)
 ```r
 # install.packages("remotes")
 remotes::install_github("AkiShiroshita/dtlog")
-```
 
 ## Load order
 

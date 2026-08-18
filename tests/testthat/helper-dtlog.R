@@ -29,6 +29,11 @@ fresh_env <- function(native = FALSE) {
   )
   env$thr <- 20
   env$TMPFILE <- tempfile(fileext = ".csv")
+  # writes a small csv and returns its path, for the fread() tests
+  env$write_csv <- function(path = env$TMPFILE) {
+    data.table::fwrite(data.table::data.table(a = 1:2, b = 3:4), path)
+    path
+  }
   if (native) {
     # shadow every function dtlog redefines with the original from data.table
     for (nm in wrapped_names()) {

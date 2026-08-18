@@ -16,5 +16,5 @@ The data table that [data.table::fread()] returns.
 Read a file into a data table, with a log
 }
 \examples{
-data.table::fread(text = "a,b\n1,2\n3,4")
+fread(text = "a,b\n1,2\n3,4")
 }

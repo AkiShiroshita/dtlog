@@ -44,20 +44,30 @@ dcast.data.table <- function(data, ...) {
 }
 
 log_melt <- function(out, before, cl, pf) {
-  log_reshape("melt", out, before$data, melted_columns(cl, pf))
+  log_reshape("melt", out, before$data, melted_columns(cl, pf, before$data))
 }
 
 log_dcast <- function(out, before, cl, pf) {
   log_reshape("dcast", out, before$data)
 }
 
-# the columns melt() actually stacked, when they were given as a plain
-# character vector -- everything else that disappeared was simply dropped
-melted_columns <- function(cl, pf) {
+# The columns melt() actually stacked -- everything else that disappeared was
+# simply dropped. measure.vars is given either as names or as column numbers,
+# so the value has to be resolved against the names of the input. A selection
+# that cannot be resolved gives NULL, and then nothing is reported as dropped
+# rather than the wrong columns being reported: that covers the list form of a
+# multi-value melt, and patterns(), which does not even evaluate outside melt().
+melted_columns <- function(cl, pf, before) {
+  if (is.null(before)) return(NULL)
   expr <- matched_arg(cl, "melt.data.table", "measure.vars")
   if (is.null(expr)) return(NULL)
   value <- tryCatch(eval(expr, pf), error = function(e) NULL)
-  if (is.character(value)) value else NULL
+  nms <- before$names
+  if (is.character(value)) return(intersect(value, nms))
+  if (is.numeric(value) && length(value) && !anyNA(value) && all(value > 0)) {
+    return(nms[value[value <= length(nms)]])
+  }
+  NULL
 }
 
 log_reshape <- function(fun, out, before, melted = NULL) {

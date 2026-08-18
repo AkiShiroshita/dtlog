@@ -5,6 +5,8 @@ This is a new submission of 'dtlog' (version 0.1.0).
 ## Test environments
 
 * local: Ubuntu 24.04, R 4.3.3
+* local: Windows 11 x64 (build 26200), R 4.6.0 (2026-04-24 ucrt),
+  'data.table' 1.18.4
 * GitHub Actions:
   * ubuntu-latest, R-devel / R-release / R-oldrel-1
   * macOS-latest, R-release
@@ -20,6 +22,10 @@ This is a new submission of 'dtlog' (version 0.1.0).
 
 The words 'dtlog' and 'tidylog' in the DESCRIPTION are package names and are
 quoted as required.
+
+The same result (0 errors | 0 warnings | 1 note) was obtained with
+`R CMD check --as-cran` on Windows 11 with R 4.6.0; the full test suite
+(589 tests in 'testthat') passed there with no failures, warnings or skips.
 
 ## Notes for the reviewer
 

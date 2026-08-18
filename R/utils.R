@@ -1,10 +1,15 @@
+`%||%` <- function(x, y) if (is.null(x)) y else x
+
 # ---- output ----------------------------------------------------------------
 
 display_functions <- function() {
   d <- getOption("dtlog.display", NULL)
   if (is.null(d)) return(list(message))
-  if (!is.list(d)) return(list(d))
-  d
+  if (!is.list(d)) d <- list(d)
+  # Anything that is not a function is dropped rather than called. Most log
+  # calls run inside try_log() and would swallow the error, but dtlog_summary()
+  # does not, and an option set to the wrong thing must not break it.
+  d[vapply(d, is.function, logical(1L))]
 }
 
 should_display <- function() {
@@ -81,10 +86,12 @@ format_list <- function(x, max_show = 5L) {
 get_type <- function(x) {
   if (is.ordered(x)) return("ordered factor")
   if (is.factor(x)) return("factor")
+  # IDate extends Date and ITime is stored as an integer, so both have to be
+  # tested before the classes they are built on
+  if (inherits(x, "IDate")) return("IDate")
+  if (inherits(x, "ITime")) return("ITime")
   if (inherits(x, "Date")) return("Date")
   if (inherits(x, c("POSIXct", "POSIXt"))) return("datetime")
-  if (inherits(x, "ITime")) return("ITime")
-  if (inherits(x, "IDate")) return("IDate")
   if (is.list(x)) return("list")
   cl <- class(x)[1L]
   if (cl == "numeric") "double" else cl
@@ -112,11 +119,15 @@ n_changed <- function(old, new) {
   if (is.factor(new)) new <- as.character(new)
   na_old <- is.na(old)
   na_new <- is.na(new)
-  cmp <- tryCatch(old != new, error = function(e) NULL, warning = function(w) NULL)
+  # Warnings are silenced rather than treated as failure: the comparison is
+  # dtlog's own, so its warnings are noise, but its result is still wanted.
+  cmp <- tryCatch(suppressWarnings(old != new), error = function(e) NULL)
   if (is.null(cmp)) return(NA_integer_)
   sum((na_old != na_new) | (!na_old & !na_new & cmp))
 }
 
+# A list column is reported as having no NA: is.na() on a list is elementwise
+# and says nothing useful about a column whose cells are themselves vectors.
 n_na <- function(x) {
   if (is.list(x)) return(0L)
   sum(is.na(x))

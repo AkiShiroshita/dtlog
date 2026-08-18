@@ -16,6 +16,13 @@ test_that("j produces select, mutate and summarize messages", {
   expect_match(msgs_t[1L],
                "^transmute: new variable 'mpg2' \\(double\\) with 25 unique values and 0% NA$")
   expect_match(msgs_t[2L], "dropped 12 variables")
+  expect_dtlog_message(quote(DT[, .SD]), "select: no changes")
+  expect_dtlog_message(quote(OTHER[, c("cyl", "label"), with = FALSE]),
+                       "select: no changes")
+  expect_dtlog_message(quote(OTHER[, .(label, cyl)]),
+                       "select: columns reordered \\(label, cyl\\)")
+  expect_dtlog_message(quote(OTHER[, lapply(.SD, identity)]),
+                       "mutate: no changes")
   expect_dtlog_message(quote(DT[, sum(mpg)]),
                        "summarize: returned one value \\(double\\)")
   expect_dtlog_message(quote(DT[, mpg]),
@@ -85,6 +92,28 @@ test_that("joins report the columns and rows they add", {
   msgs <- dtlog_messages(quote(DT[OTHER, on = "cyl"]))
   expect_match(msgs[1L], "^join \\(on cyl\\): added one column \\(label\\)$")
   expect_match(msgs[2L], "rows: was 32, now 18 \\(-14\\)")
+  # .() cannot be evaluated outside data.table, but still reads as a column
+  expect_match(dtlog_messages(quote(DT[OTHER, on = .(cyl)]))[1L],
+               "^join \\(on cyl\\): ")
+  expect_match(dtlog_messages(quote(DT[OTHER, on = c(cyl = "cyl")]))[1L],
+               "^join \\(on cyl == cyl\\): ")
+})
+
+test_that("by= names the columns data.table actually grouped by", {
+  env <- fresh_env()
+  # a variable in the caller must not shadow a column of the same name: inside
+  # by= the columns win, so resolving the caller first would name the wrong one
+  env$cyl <- "gear"
+  expect_match(dtlog_messages(quote(DT[, .N, by = cyl]), env)[1L],
+               "^group_by: one grouping variable \\(cyl\\)$")
+  # a variable that is not a column does supply the names
+  expect_match(dtlog_messages(quote(DT[, .N, by = cols]), env)[1L],
+               "^group_by: 2 grouping variables \\(hp, wt\\)$")
+  # c("a", "b") reads the same as .(a, b), without the quotes
+  expect_match(dtlog_messages(quote(DT[, .N, by = c("cyl", "gear")]), env)[1L],
+               "^group_by: 2 grouping variables \\(cyl, gear\\)$")
+  expect_match(dtlog_messages(quote(DT[, .N, by = .(cyl, gear)]), env)[1L],
+               "^group_by: 2 grouping variables \\(cyl, gear\\)$")
 })
 
 test_that("merge reports the join type and the matching", {
@@ -97,6 +126,23 @@ test_that("merge reports the join type and the matching", {
   expect_match(dtlog_messages(quote(merge(DT, OTHER, by = "cyl")))[1L], "^inner_join")
   expect_match(dtlog_messages(quote(merge(DT, OTHER, by = "cyl", all = TRUE)))[1L],
                "^full_join")
+})
+
+test_that("merge without by= counts on the key, like merge.data.table does", {
+  env <- fresh_env()
+  # the two tables share more columns than their key; data.table joins on the
+  # key alone, so the unmatched rows have to be counted on the key alone too
+  env$A <- data.table::data.table(id = 1:4, grp = c(1, 1, 2, 2), v = 1:4,
+                                  key = "id")
+  env$B <- data.table::data.table(id = 3:6, grp = c(9, 9, 9, 9), w = 1:4,
+                                  key = "id")
+  msgs <- dtlog_messages(quote(merge(A, B)), env)
+  expect_match(msgs[1L], "^inner_join: added 3 columns \\(grp\\.x, grp\\.y, w\\)$")
+  expect_match(msgs[2L], "rows only in A\\s+\\(2\\)")
+  expect_match(msgs[3L], "rows only in B\\s+\\(2\\)")
+  # no "(includes duplicates)": there are none once the key is used
+  expect_match(msgs[4L], "matched rows\\s+2$")
+  expect_match(msgs[6L], "rows total\\s+2$")
 })
 
 test_that("the other wrapped functions report what they did", {
@@ -115,6 +161,11 @@ test_that("the other wrapped functions report what they did", {
   expect_dtlog_message(
     quote(melt(WIDE, id.vars = "id", measure.vars = "p", value.name = "val")),
     "melt: reorganized \\(p\\) into \\(variable, val\\) \\[was 2x3, now 2x3\\], dropped one variable \\(q\\)"
+  )
+  # column numbers have to be resolved to names, or q reads as reorganized
+  expect_dtlog_message(
+    quote(melt(WIDE, id.vars = "id", measure.vars = 2L)),
+    "melt: reorganized \\(p\\) into \\(variable, value\\) \\[was 2x3, now 2x3\\], dropped one variable \\(q\\)"
   )
   expect_dtlog_message(quote(dcast(LONG, id ~ variable)),
                        "dcast: reorganized \\(variable, value\\) into \\(p, q\\)")
@@ -135,6 +186,41 @@ test_that("the other wrapped functions report what they did", {
                        "as.data.table: converted data.frame to data.table \\(2 rows, 2 columns\\)")
   expect_dtlog_message(quote(as.data.table(head(mtcars, 3), keep.rownames = "car")),
                        "as.data.table: converted data.frame to data.table \\(3 rows, 12 columns\\), added \\(car\\)")
+})
+
+test_that("setorder() reports whether any row actually moved", {
+  env <- fresh_env()
+  env$S <- data.table::data.table(a = c(3, 1, 2), b = 1)
+  expect_dtlog_message(quote(setorder(S, a)), "arrange: sorted 3 rows by \\(a\\)", env)
+  expect_dtlog_message(quote(setorder(S, a)), "setorder: no changes", env)
+  expect_dtlog_message(quote(setorderv(S, "a")), "setorderv: no changes", env)
+  expect_dtlog_message(quote(setorder(S, a, b)), "setorder: no changes", env)
+  expect_dtlog_message(quote(setnames(S, "a", "a")), "setnames: no changes", env)
+  # an expression is not a column name, so there is nothing to compare against
+  expect_dtlog_message(quote(setorder(S, -a)), "arrange: sorted 3 rows by \\(-a\\)", env)
+
+  # detail = "compact" never copies, so it cannot compare either
+  old <- options(dtlog.detail = "compact")
+  on.exit(options(old), add = TRUE)
+  expect_dtlog_message(quote(setorder(S, a)), "arrange: sorted 3 rows by \\(a\\)", env)
+  expect_dtlog_message(quote(setorder(S, a)), "arrange: sorted 3 rows by \\(a\\)", env)
+})
+
+test_that("setattr() reports what it did to the attribute", {
+  env <- fresh_env()
+  env$A <- data.table::data.table(u = 1:2)
+  expect_dtlog_message(quote(setattr(A, "note", "hello")),
+                       "setattr: added attribute 'note' by reference", env)
+  expect_dtlog_message(quote(setattr(A, "note", "hello")),
+                       "setattr: no changes to attribute 'note'", env)
+  expect_dtlog_message(quote(setattr(A, "note", "bye")),
+                       "setattr: changed attribute 'note' by reference", env)
+  expect_dtlog_message(quote(setattr(A, "note", NULL)),
+                       "setattr: removed attribute 'note' by reference", env)
+  # setattr() rewrites the very vector that attr() hands out, so the old value
+  # has to be copied before the call or every change would look like none
+  expect_dtlog_message(quote(setattr(A, "names", "v")),
+                       "setattr: changed attribute 'names' by reference", env)
 })
 
 test_that("the set functions report what they changed", {

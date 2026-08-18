@@ -15,14 +15,18 @@ use the `conflicted` package.
 \details{
 The operations themselves are never changed: `dtlog` only adds a message.
 Modification by reference (`:=`, `set*()`), keys, indices, return values and
-visibility all behave exactly as they do in `data.table`.
+visibility all behave exactly as they do in `data.table`. The one thing that
+is not identical is that `with=` and `which=` are evaluated twice, once by
+`dtlog` to classify the call and once by `data.table`; this is only
+noticeable if such an argument is written as an expression with a side
+effect.
 }
 \section{Options}{
 
 \describe{
   \item{`dtlog.display`}{`NULL` (default) prints with [message()]. A list of
     functions sends the output to each of them. An empty list turns logging
-    off.}
+    off, as does anything that is not a function, which is ignored.}
   \item{`dtlog.detail`}{`"full"` (default) reports value level information
     (types, unique values, share of `NA`, number of changed values).
     `"compact"` only reports rows, columns and column names, and never
@@ -42,11 +46,11 @@ Useful links:
 
 }
 \author{
-\strong{Maintainer}: Akihiro Shiroshita \email{akihirokun8@gmail.com}
+\strong{Maintainer}: Akihiro Shiroshita \email{akihirokun8@gmail.com} [copyright holder]
 
 Authors:
 \itemize{
-  \item Akihiro Shiroshita \email{akihirokun8@gmail.com}
+  \item Akihiro Shiroshita \email{akihirokun8@gmail.com} [copyright holder]
 }
 
 }

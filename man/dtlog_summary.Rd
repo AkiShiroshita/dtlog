@@ -10,10 +10,10 @@ dtlog_summary(.data)
 \item{.data}{A `data.table` (or any data frame).}
 }
 \value{
-`.data`, invisibly changed in no way.
+`.data`, unchanged and returned visibly.
 }
 \description{
-Prints the dimensions, the key and the number of columns of a data table,
+Prints the number of rows and columns of a data table, along with its key,
 and returns the object unchanged, so that it can be used within a chain of
 operations.
 }

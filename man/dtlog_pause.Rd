@@ -10,7 +10,10 @@ dtlog_pause()
 dtlog_resume()
 }
 \value{
-Invisibly `TRUE` if logging was enabled before the call.
+Invisibly the state *before* the call: `TRUE` if logging was
+  enabled, `FALSE` if it was already paused. Both functions report the
+  state before the call, so `dtlog_resume()` returns `FALSE` when it
+  actually resumed something.
 }
 \description{
 `dtlog_pause()` turns off all `dtlog` messages without detaching the

@@ -2,10 +2,15 @@
 
 is_missing_arg <- function(x) identical(x, quote(expr = ))
 
-is_call_to <- function(x, names) is.call(x) && is.name(x[[1L]]) &&
-  as.character(x[[1L]]) %in% names
+is_call_to <- function(x, fun_names) is.call(x) && is.name(x[[1L]]) &&
+  as.character(x[[1L]]) %in% fun_names
 
-# Split the call into its named arguments without evaluating anything.
+# Split the call into its named arguments. The data.table expressions
+# themselves -- i, j, by, keyby -- are never evaluated here. A few control
+# arguments are: `which` and `with` decide how the result has to be read, and
+# the left hand side of a `(cols) :=` has to be resolved to column names.
+# data.table evaluates those a second time, so a side effect written into
+# `with=` or `which=` runs twice.
 parse_bracket_call <- function(cl, pf) {
   matched <- match.call(.dt$bracket, cl, expand.dots = TRUE)
   arg <- function(name) {
@@ -62,7 +67,7 @@ assign_targets <- function(j, pf) {
   # (cols) := ... , c("a", "b") := ... and other computed column names
   static <- is_call_to(lhs, "c") &&
     all(vapply(as.list(lhs)[-1L], is.character, logical(1L)))
-  computed <- is_call_to(lhs, "(") || is.name(lhs) || is.character(lhs)
+  computed <- is_call_to(lhs, "(")
   if (static) {
     return(unlist(lapply(as.list(lhs)[-1L], as.character), use.names = FALSE))
   }
@@ -84,7 +89,7 @@ is_join_call <- function(info, pf) {
   }
   if (is.name(i)) {
     value <- tryCatch(get0(as.character(i), envir = pf), error = function(e) NULL)
-    return(is.data.frame(value) || data.table::is.data.table(value))
+    return(is.data.frame(value))
   }
   FALSE
 }

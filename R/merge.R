@@ -28,10 +28,11 @@ log_merge <- function(out, before, cl, pf) {
   if (is.null(x) || is.null(out)) return(invisible(NULL))
   added <- setdiff(names(out), x$names)
   type <- join_type(cl, pf)
-  first <- sprintf(
-    "added %s%s", plural(length(added), "column"),
-    if (length(added)) sprintf(" (%s)", format_list(added)) else ""
-  )
+  first <- if (length(added)) {
+    sprintf("added %s (%s)", plural(length(added), "column"), format_list(added))
+  } else {
+    "added no columns"
+  }
   stats <- if (detail_full()) try_log(join_stats(x, y, cl, pf)) else NULL
   written <- before$.call %||% cl
   rest <- if (is.null(stats)) {
@@ -69,12 +70,25 @@ merge_by <- function(x, y, cl, pf) {
   by_x <- value("by.x") %||% by
   by_y <- value("by.y") %||% by
   if (is.null(by_x) || is.null(by_y)) {
-    common <- intersect(x$names, y$names)
-    if (!length(common)) return(NULL)
-    by_x <- by_y <- common
+    default <- default_merge_by(x, y)
+    if (!length(default)) return(NULL)
+    by_x <- by_y <- default
   }
   if (length(by_x) != length(by_y)) return(NULL)
   list(x = by_x, y = by_y)
+}
+
+# What merge.data.table() falls back to when neither by= nor by.x=/by.y= was
+# given: the key the two tables share, then the key of x, then the columns they
+# have in common. Only the last of the three is what one would guess, and
+# getting it wrong means counting matches on the wrong columns. A `y` that is
+# not a data.table has no key, so the chain lands on key(x) -- which is what
+# merge.data.table() does for that case as well.
+default_merge_by <- function(x, y) {
+  shared <- intersect(x$key, y$key)
+  if (length(shared)) return(shared)
+  if (length(x$key)) return(x$key)
+  intersect(x$names, y$names)
 }
 
 join_stats <- function(x, y, cl, pf) {
@@ -87,12 +101,7 @@ join_stats <- function(x, y, cl, pf) {
                      which = TRUE, mult = "first", nomatch = NA)
   match_y <- bracket(x$obj, y$obj, on = stats::setNames(by$y, by$x),
                      which = TRUE, mult = "first", nomatch = NA)
-  list(
-    only_x = sum(is.na(match_x)),
-    only_y = sum(is.na(match_y)),
-    matched_x = sum(!is.na(match_x)),
-    matched_y = sum(!is.na(match_y))
-  )
+  list(only_x = sum(is.na(match_x)), only_y = sum(is.na(match_y)))
 }
 
 # how the two tables were called, for the labels of the summary block
