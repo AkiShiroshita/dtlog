@@ -8,6 +8,12 @@ This is the first submission of 'dtlog' (version 0.1.0).
   x86_64-w64-mingw32, 'data.table' 1.18.4 -- `R CMD build` followed by
   `R CMD check --as-cran`.
 
+* win-builder, R release 4.6.1 (2026-06-24 ucrt), Windows Server 2022 x64
+  (build 20348) -- Status: 1 NOTE (2026-08-18).
+
+* win-builder, R Under development (unstable) (2026-08-17 r90424 ucrt),
+  Windows Server 2022 x64 (build 20348) -- Status: 1 NOTE.
+
 * GitHub Actions, `R CMD check --as-cran` on each of:
 
   * Ubuntu 24.04, R-devel
@@ -19,7 +25,8 @@ This is the first submission of 'dtlog' (version 0.1.0).
 ## R CMD check results
 
 Every GitHub Actions platform above reports Status: OK -- 0 errors, 0 warnings,
-0 notes. Locally the result is 0 errors | 0 warnings | 1 note.
+0 notes. Both win-builder runs (R-release and R-devel) report 0 errors |
+0 warnings | 1 note, and locally the result is 0 errors | 0 warnings | 1 note.
 
 The note is the expected one for a package not yet on CRAN:
 
