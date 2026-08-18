@@ -1,31 +1,41 @@
 ## Submission
 
-This is a new submission of 'dtlog' (version 0.1.0).
+This is the first submission of 'dtlog' (version 0.1.0).
 
 ## Test environments
 
-* local: Ubuntu 24.04, R 4.3.3
-* local: Windows 11 x64 (build 26200), R 4.6.0 (2026-04-24 ucrt),
-  'data.table' 1.18.4
-* GitHub Actions:
-  * ubuntu-latest, R-devel / R-release / R-oldrel-1
-  * macOS-latest, R-release
-  * windows-latest, R-release
+* local: Windows 11 x64 (build 26200), R 4.6.0 (2026-04-24 ucrt), platform
+  x86_64-w64-mingw32, 'data.table' 1.18.4 -- `R CMD build` followed by
+  `R CMD check --as-cran`.
+
+* GitHub Actions, `R CMD check --as-cran` on each of:
+
+  * Ubuntu 24.04, R-devel
+  * Ubuntu 24.04, R release
+  * Ubuntu 24.04, R oldrel-1
+  * macOS (aarch64-apple-darwin23), R 4.6.1
+  * Windows Server, R release
 
 ## R CMD check results
 
-0 errors | 0 warnings | 1 note
+Every GitHub Actions platform above reports Status: OK -- 0 errors, 0 warnings,
+0 notes. Locally the result is 0 errors | 0 warnings | 1 note.
 
+The note is the expected one for a package not yet on CRAN:
+
+```
 * checking CRAN incoming feasibility ... NOTE
-  Maintainer: 'Akihiro Shiroshita <akihirokun8@gmail.com>'
-  New submission
+Maintainer: 'Akihiro Shiroshita <akihirokun8@gmail.com>'
+
+New submission
+```
 
 The words 'dtlog' and 'tidylog' in the DESCRIPTION are package names and are
 quoted as required.
 
-The same result (0 errors | 0 warnings | 1 note) was obtained with
-`R CMD check --as-cran` on Windows 11 with R 4.6.0; the full test suite
-(589 tests in 'testthat') passed there with no failures, warnings or skips.
+`R CMD check` reports OK for every other check, including the examples, the
+vignette and the test suite (testthat edition 3, 68 tests and 632 expectations
+across 9 files, none failing and none skipped).
 
 ## Notes for the reviewer
 

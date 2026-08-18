@@ -253,79 +253,9 @@ dt[, grp := .GRP, by = cyl]
 dt[, lag_mpg := shift(mpg)]
 #> mutate: new variable 'lag_mpg' (double) with 25 unique values and 3% NA
 ```
-
 `shift()` itself is not wrapped. It works on vectors and runs once per group, so
 wrapping it would print one message per group. The `:=` around it already tells
 you that a lag column appeared and how many `NA`s it has.
-
-## Speed
-
-Logging a query compares row counts, column names and types, which costs
-nothing worth measuring. `:=` is different: it updates in place, so the old
-values are gone by the time dtlog could look at them. With the default
-`dtlog.detail = "full"`, dtlog copies the columns a `:=` writes to, and only
-those. Set `options(dtlog.detail = "compact")` and no data is ever copied.
-
-Median of five runs on 2 million rows by 3 columns:
-
-| Call                                   | data.table | dtlog (full) | dtlog (compact) |
-| -------------------------------------- | ---------- | ------------ | --------------- |
-| `DT[v > 0.5]`                        | 0.038 s    | 0.017 s      | –              |
-| `DT[, .(m = mean(v)), by = g]`       | 0.059 s    | 0.054 s      | –              |
-| `DT[, z := v * 2]` (new column)      | 0.002 s    | 0.022 s      | 0.002 s         |
-| `DT[, v := v * 2]` (existing column) | 0.002 s    | 0.060 s      | 0.002 s         |
-
-The matching counts for `merge()` are also a `"full"` feature. They cost two
-extra matching passes over the inputs.
-
-## Checked against tidylog
-
-Where dtlog and [tidylog](https://github.com/elbersb/tidylog) describe the same
-operation, they say the same thing, word for word.
-`tests/testthat/test-tidylog-parity.R` runs each operation twice -- once as
-data.table with dtlog, once as dplyr/tidyr with tidylog -- and compares both the
-data and the message:
-
-| operation                                                                                                 | dtlog and tidylog                                                                                                                      |
-| --------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
-| `filter`, `select`, `mutate` (including dropping columns), `distinct`, `drop_na`, `relocate`  | identical wording                                                                                                                      |
-| taking rows (`DT[1:5]`, `head()`, `tail()` against `slice()`, `slice_head()`, `slice_tail()`) | identical counts; the verb follows the data.table function                                                                             |
-| joins                                                                                                     | identical counts, parentheses and duplicate note; dtlog names the tables it was given (`rows only in dt`) where tidylog prints `x` |
-| `melt()` / `dcast()`                                                                                  | identical wording apart from the function name, which follows data.table (`melt`, not `pivot_longer`)                              |
-| `summarize`                                                                                             | dtlog reports`(was 32 rows and 12 columns)` where tidylog reports `ungrouped`, because data.table has no persistent grouping       |
-| `setnames()`                                                                                            | dtlog prints`mpg -> miles`, tidylog prints only the new name                                                                         |
-
-## What dtlog does not change
-
-dtlog re-evaluates the call you wrote, unchanged, in the frame you wrote it in.
-That keeps all of this intact:
-
-- return values and visibility (`DT[, x := 1]` still prints nothing)
-- modification by reference: `:=` and the `set*()` functions update the same
-  object, with the same address
-- non-standard evaluation, including `setkey(dt, col)`, `.SD`, `.N` and `env =`
-- `setDT()` converting a variable in the caller
-- data.table writing an over-allocated copy back to the caller's variable
-- the fallback to `[.data.frame` when the calling package is not data.table
-  aware
-
-`tests/testthat/test-parity.R` and `test-functions-parity.R` run more than a
-hundred data.table idioms twice, once through dtlog and once through
-data.table's own functions, and compare the value, its visibility and the state
-of the inputs.
-
-## Caveats
-
-- `[.data.table` is an S3 method that data.table does not export, so dtlog
-  fetches it with `getFromNamespace()`.
-- dtlog puts a few extra frames on the call stack. Code inside `j` that counts
-  frames sees them: `sys.nframe()` returns a larger number, and `traceback()`
-  shows dtlog's wrapper. Variable lookup is not affected. `<<-`, `get()` and
-  `exists()` inside `i` and `j` reach exactly the same objects as they do
-  without dtlog, and `parent.frame()` inside `j` points at data.table's own
-  environment either way.
-- Errors raised while building a message are swallowed. Logging will not stop
-  your analysis.
 
 ## License
 
