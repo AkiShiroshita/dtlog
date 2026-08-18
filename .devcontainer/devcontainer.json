@@ -1,0 +1,28 @@
+{
+  "name": "dtlog-R-dev",
+  "image": "mcr.microsoft.com/devcontainers/r:1-ubuntu-24.04",
+  "features": {
+    "ghcr.io/devcontainers/features/git:1": {},
+    "ghcr.io/devcontainers/features/github-cli:1": {}
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "REditorSupport.r",
+        "rdebugger.r-debugger",
+        "quarto.quarto",
+        "ms-vscode.makefile-tools",
+        "github.copilot",
+        "github.copilot-chat",
+        "ms-python.python",
+        "ms-azuretools.vscode-docker"
+      ]
+    }
+  },
+  "remoteUser": "vscode",
+  "updateRemoteUserUID": true,
+  "containerEnv": {
+    "R_LIBS_USER": "/home/vscode/.R/library"
+  },
+  "postCreateCommand": "bash .devcontainer/post-create.sh"
+}
