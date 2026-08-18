@@ -51,5 +51,12 @@ if ! command -v quarto >/dev/null 2>&1; then
   sudo apt-get -f install -y
 fi
 
+# Install Codex CLI if needed
+if ! command -v codex >/dev/null 2>&1; then
+  npm install -g @openai/codex
+fi
+
 # Friendly final check
 Rscript -e "pkgs <- c('usethis','devtools','roxygen2','testthat','pkgdown','fs','sass','pkgload','profvis','bslib','shiny','rmarkdown','htmlwidgets','miniUI','textshaping'); print(sapply(pkgs, function(p) if (requireNamespace(p, quietly=TRUE)) as.character(packageVersion(p)) else 'MISSING'))"
+command -v codex
+codex --version

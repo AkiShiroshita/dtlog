@@ -1,0 +1,23 @@
+Package: dtlog
+Type: Package
+Title: Logging for 'data.table' Operations
+Version: 0.1.0
+Authors@R:
+    person("Akihiro", "Shiroshita", , "akihirokun8@gmail.com",
+           role = c("aut", "cre", "cph"))
+Description: Provides feedback about 'data.table' operations. 'dtlog' redefines
+    the subsetting method for data tables as well as several functions exported
+    by 'data.table' so that each operation prints a short message describing
+    what it did: how many rows were removed, which columns were added, updated
+    or dropped, how many groups an aggregation produced, and so on. The
+    operations themselves are left untouched, including modification by
+    reference. Inspired by the 'tidylog' package.
+License: MIT + file LICENSE
+Encoding: UTF-8
+Depends: R (>= 3.5.0)
+Imports: data.table (>= 1.14.0), stats, utils
+Suggests: testthat (>= 3.0.0), dplyr, tidyr, tidylog, tibble
+Config/testthat/edition: 3
+URL: https://github.com/AkiShiroshita/dtlog
+BugReports: https://github.com/AkiShiroshita/dtlog/issues
+Config/roxygen2/version: 8.1.0

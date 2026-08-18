@@ -1,0 +1,8 @@
+^\.devcontainer$
+^\.github$
+^.*\.Rproj$
+^\.Rproj\.user$
+^dtlog\.Rcheck$
+^dtlog_.*\.tar\.gz$
+^LICENSE\.md$
+^cran-comments\.md$
