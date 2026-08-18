@@ -210,4 +210,16 @@ test_that("fread() does not print the data as if it were a file name", {
   path <- eval(quote(write_csv(TMPFILE)), env)
   messages <- loud(eval(quote(fread(TMPFILE)), env))
   expect_match(messages, sprintf("from '%s'", basename(path)), fixed = TRUE)
+
+  # and it is named however long it is: a temporary directory on macOS alone
+  # is nearly a hundred characters
+  deep <- file.path(tempdir(), "dtlog-long", strrep("d", 60L), strrep("e", 60L))
+  dir.create(deep, recursive = TRUE, showWarnings = FALSE)
+  on.exit(unlink(file.path(tempdir(), "dtlog-long"), recursive = TRUE),
+          add = TRUE)
+  env$LONG_PATH <- file.path(deep, "wide.csv")
+  eval(quote(write_csv(LONG_PATH)), env)
+  expect_gt(nchar(env$LONG_PATH), 100L)
+  messages <- loud(eval(quote(fread(LONG_PATH)), env))
+  expect_match(messages, "from 'wide.csv'", fixed = TRUE)
 })

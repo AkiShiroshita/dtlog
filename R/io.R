@@ -27,13 +27,15 @@ is_file_string <- function(x) {
 
 # input= can be a path or the data itself. data.table decides between the two
 # on the presence of a line break, so dtlog does the same rather than printing
-# a csv into the log message. The length cap on top of that is dtlog's own: a
-# long single line of data carries no line break either, and no file name worth
-# printing is that long. fwrite()'s file= is never ambiguous in this way, so it
-# only needs is_file_string().
+# a csv into the log message. A file that is really there is named however long
+# its path is: a temporary directory on macOS alone can push one past a hundred
+# characters. The length cap only stands in when there is no such file to look
+# at, because a long single line of data carries no line break either, and no
+# file name worth printing is that long. fwrite()'s file= is never ambiguous in
+# this way, so it only needs is_file_string().
 is_path <- function(x) {
-  is_file_string(x) &&
-    nchar(x) < 100L && !grepl("[\r\n]", x)
+  is_file_string(x) && !grepl("[\r\n]", x) &&
+    (nchar(x) < 100L || file.exists(x))
 }
 
 #' Write a data table to a file, with a log
