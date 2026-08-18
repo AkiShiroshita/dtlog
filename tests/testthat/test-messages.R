@@ -263,6 +263,20 @@ test_that("options control the output", {
   expect_message(eval(quote(DT[mpg > 20]), env), "filter")
 })
 
+test_that("pause and resume report the state they found", {
+  on.exit(dtlog_resume(), add = TRUE)
+  # the call that actually pauses reports that logging was active
+  expect_true(dtlog_pause())
+  # and a second one reports that it was already paused
+  expect_false(dtlog_pause())
+  # the call that actually resumes reports that logging was paused
+  expect_false(dtlog_resume())
+  expect_true(dtlog_resume())
+  # both return their answer invisibly
+  expect_false(withVisible(dtlog_pause())$visible)
+  expect_false(withVisible(dtlog_resume())$visible)
+})
+
 test_that("the compact detail level avoids value level information", {
   env <- fresh_env()
   old <- options(dtlog.detail = "compact")

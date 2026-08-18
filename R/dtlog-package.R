@@ -26,6 +26,9 @@
 #'   \item{`dtlog.log_from_packages`}{`FALSE` (default) only logs calls made
 #'     from the global environment, so that `data.table` calls inside other
 #'     packages stay silent.}
+#'   \item{`dtlog.table_max_unique`}{`20` (default). A column with this many
+#'     unique values or more is described by [table()] as possibly continuous
+#'     instead of having its values listed. `Inf` lists every column.}
 #' }
 #'
 #' @keywords internal
@@ -55,10 +58,12 @@
 #' package, `dtlog_resume()` turns them back on. This is useful for a block of
 #' code that would otherwise produce a lot of output.
 #'
-#' @return Invisibly the state *before* the call: `TRUE` if logging was
-#'   enabled, `FALSE` if it was already paused. Both functions report the
-#'   state before the call, so `dtlog_resume()` returns `FALSE` when it
-#'   actually resumed something.
+#' @return Invisibly the logging state *before* the call: `TRUE` if logging was
+#'   active, `FALSE` if it was paused. Both functions report the state they
+#'   found rather than the one they left behind, so `dtlog_pause()` returns
+#'   `TRUE` when it is the call that actually paused logging, and
+#'   `dtlog_resume()` returns `FALSE` when it is the call that actually
+#'   resumed it.
 #' @examples
 #' dtlog_pause()
 #' dtlog_resume()

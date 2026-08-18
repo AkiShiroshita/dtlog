@@ -104,6 +104,64 @@ conflict_prefer("setnames", "dtlog")
 | `set()`, `setDT()`, `setDF()`, `setattr()`                                            | what was changed by reference                                                                                           |
 | `fread()`, `fwrite()`                                                                     | rows, columns and the file name                                                                                         |
 | `as.data.table()`                                                                           | the class it converted from and the resulting size                                                                      |
+| `table(DT)`                                                                                  | one row per column: its name, how many unique values it has, and the values themselves                                  |
+
+## Describing the variables of a table
+
+`table()` is `base::table()` with one addition: given a single `data.table` it
+describes the table instead of cross tabulating it. Each column becomes one row
+-- its name, how many unique values it holds, and the values themselves -- and
+the description is returned as a `data.table` so it can be kept, written out or
+printed again.
+
+```r
+table(dt)
+#> table: 32 rows and 12 columns
+#>         Variable N_unique                            Unique_value
+#>              car       32 20+ unique values — possibly continuous
+#>              mpg       25 20+ unique values — possibly continuous
+#>              cyl        3                                 4; 6; 8
+#>             disp       27 20+ unique values — possibly continuous
+#>               hp       22 20+ unique values — possibly continuous
+#>             drat       22 20+ unique values — possibly continuous
+#>               wt       29 20+ unique values — possibly continuous
+#>             qsec       30 20+ unique values — possibly continuous
+#>               vs        2                                    0; 1
+#>               am        2                                    0; 1
+#>             gear        3                                 3; 4; 5
+#>             carb        6                        1; 2; 3; 4; 6; 8
+```
+
+The values are listed in the order the column sorts in: numbers ascending,
+characters alphabetically, dates and times chronologically, factors by their
+levels. A column with 20 or more unique values is reported as possibly
+continuous rather than listed, and a list of values longer than 80 characters
+is truncated. Missing values are listed and counted like any other value: `NA`
+(including `NA` as a level of a factor) appears as `Missing`, `NaN` as `NaN`,
+and both are counted in `N_unique`; an empty string is a value of its own, not
+a missing one.
+
+```r
+table(dat)
+#> table: 4 rows and 4 columns
+#>         Variable N_unique                    Unique_value
+#>              num        3                   1; 2; Missing
+#>              chr        3                   a; b; Missing
+#>              fac        3                no; yes; Missing
+#>             date        3 2020-01-01; 2020-01-02; Missing
+```
+
+The description goes through the same output as every other message, so
+`dt_log()` records it as well.
+
+Only a single `data.table` triggers this. Every other call is passed straight
+on to `base::table()`, so nothing that worked before changes:
+
+```r
+table(dt$cyl, dt$gear)       # the contingency table, as always
+table(df$sex, df$death)      # a data.frame column is not a data.table either
+table(as.data.frame(dt))     # and this is still base's cross tabulation
+```
 
 ## Pipes
 
