@@ -186,6 +186,15 @@ test_that("fread() and fwrite() evaluate their arguments only once", {
   expect_evaluated_once(quote(fwrite(tick(OTHER), TMPFILE)))
 })
 
+test_that("rbindlist() builds its list of tables only once", {
+  # rbindlist(lapply(files, read_rds)) is the usual way to read a directory;
+  # reading every file a second time to write the log would be expensive as
+  # well as wrong
+  expect_evaluated_once(quote(rbindlist(lapply(1L, function(i) tick(OTHER)))))
+  expect_evaluated_once(quote(rbindlist(tick(list(OTHER, HALF)),
+                                        use.names = TRUE, fill = TRUE)))
+})
+
 test_that("fwrite() logs the file it actually wrote", {
   path <- tempfile(fileext = ".csv")
   paths <- character()

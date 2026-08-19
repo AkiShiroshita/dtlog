@@ -121,10 +121,16 @@ row_change <- function(before_n, after_n) {
 
 log_subset <- function(x, out, info, before) {
   selection <- j_is_selection(x, info)
-  # when j aggregates, the number of rows in the result says nothing about how
-  # many rows i selected, so the two are reported together instead
+  # Without by=, a j that aggregates collapses the result into a single row,
+  # so a result that still has several rows was shaped by i and the two can be
+  # reported one after the other. Where i and an aggregation do meet, the row
+  # count of the result says nothing about how many rows i selected, and they
+  # are reported together instead. (A j that recycles the rows i selected into
+  # a longer result is read as a filter here; that is rare enough to be worth
+  # the clearer message in the common case.)
   aggregated <- info$has_by ||
-    (info$has_j && !selection && nrow(out) != before$nrow)
+    (info$has_j && !selection && nrow(out) != before$nrow &&
+       (!info$has_i || nrow(out) == 1L))
   if (info$has_i && !aggregated) log_i(out, info, before)
   if (info$has_by) log_group_by(info, before$names)
   if (aggregated) return(log_summarize(out, info, before))
@@ -142,6 +148,19 @@ j_is_selection <- function(x, info) {
       (is.character(e) && all(e %in% nms))
   }
   if (identical(j, quote(.SD)) || is_column(j)) return(TRUE)
+  # DT[, ..cols] reads the column names off a variable one frame up; there is
+  # nothing else a `..` prefixed symbol can hold
+  if (is.name(j) && startsWith(as.character(j), "..")) return(TRUE)
+  # DT[, !c("vs", "am")] and DT[, -c("vs", "am")] drop columns by name, which
+  # is a selection too. Only the character forms are: `-mpg` and `!vs` negate
+  # the values of a column instead of leaving it out.
+  if (is_call_to(j, c("!", "-")) && length(j) == 2L) {
+    inner <- j[[2L]]
+    parts <- if (is_call_to(inner, "c")) as.list(inner)[-1L] else list(inner)
+    return(length(parts) > 0L && all(vapply(
+      parts, function(e) is.character(e) && all(e %in% nms), logical(1L)
+    )))
+  }
   if (is_call_to(j, c(".", "list", "c"))) {
     parts <- as.list(j)[-1L]
     return(length(parts) > 0L && all(vapply(parts, is_column, logical(1L))))
@@ -194,7 +213,10 @@ log_j <- function(x, out, info, before, selection = j_is_selection(x, info)) {
   added <- setdiff(new, old)
   same_rows <- identical(nrow(x), nrow(out))
   lines <- list()
-  if (length(dropped) && !length(added)) {
+  # only a j that picks existing columns turns into a plain select; one that
+  # computes its columns keeps the mutate wording even when every name it
+  # returns was already there
+  if (selection && length(dropped) && !length(added)) {
     display(sprintf(
       "select: dropped %s (%s)",
       plural(length(dropped), "variable"), format_list(dropped)
@@ -209,11 +231,28 @@ log_j <- function(x, out, info, before, selection = j_is_selection(x, info)) {
       "dropped %s (%s)", plural(length(dropped), "variable"), format_list(dropped)
     ))
   }
-  if (detail_full() && same_rows && !info$has_i) {
+  # values can only be compared when the rows still line up, but a column
+  # whose type changed is worth a line either way -- and a conversion that
+  # leaves the values as they were, as.numeric() on a column of digits,
+  # changes no value at all
+  comparable <- same_rows && !info$has_i
+  if (detail_full()) {
     for (nm in intersect(old, new)) {
-      changed <- n_changed(x[[nm]], out[[nm]])
+      before_col <- x[[nm]]
+      after_col <- out[[nm]]
+      if (!identical(get_type(before_col), get_type(after_col))) {
+        lines <- c(lines, if (comparable) {
+          describe_update(nm, before_col, after_col)
+        } else {
+          sprintf("converted '%s' from %s to %s", nm,
+                  get_type(before_col), get_type(after_col))
+        })
+        next
+      }
+      if (!comparable) next
+      changed <- n_changed(before_col, after_col)
       if (!is.na(changed) && changed > 0L) {
-        lines <- c(lines, describe_update(nm, x[[nm]], out[[nm]]))
+        lines <- c(lines, describe_update(nm, before_col, after_col))
       }
     }
   }

@@ -68,11 +68,51 @@ test_that("an aggregating j is not reported as a filter", {
   expect_match(msgs3[1L], "^filter: removed 18 rows")
   expect_match(msgs3[2L], "^select: dropped 10 variables")
 
+  # a j that computes columns without aggregating leaves the rows to i as well
+  msgs4 <- dtlog_messages(quote(DT[mpg > 20, .(car, kpl = mpg * 0.425)]))
+  expect_match(msgs4[1L], "^filter: removed 18 rows \\(56%\\), 14 rows remaining$")
+  expect_match(msgs4[2L], "^mutate: new variable 'kpl' \\(double\\)")
+  expect_match(msgs4[3L], "dropped 11 variables")
+  msgs5 <- dtlog_messages(quote(DT[mpg > 1000, .(car, kpl = mpg * 0.425)]))
+  expect_match(msgs5[1L], "^filter: removed all rows \\(100%\\)$")
+
   # aggregation without i keeps the plain wording
   expect_identical(
     dtlog_messages(quote(DT[, lapply(.SD, mean), .SDcols = c("mpg", "hp")])),
     "summarize: now one row and 2 columns (was 32 rows and 12 columns)"
   )
+})
+
+test_that("a j that computes its columns is not reported as a select", {
+  # every name it returns was already there, but the values were computed
+  msgs <- dtlog_messages(quote(DT[, .(car, mpg = as.integer(mpg))]))
+  expect_match(msgs[1L], "^mutate: dropped 10 variables")
+  expect_match(msgs[2L], "converted 'mpg' from double to integer \\(0 new NA\\)$")
+  msgs2 <- dtlog_messages(quote(DT[, .(mpg = mpg * 2)]))
+  expect_match(msgs2[1L], "^mutate: dropped 11 variables")
+  expect_match(msgs2[2L], "changed 32 values \\(100%\\) of 'mpg' \\(0 new NAs\\)$")
+
+  # the rows do not line up after a filter, but the type change still shows
+  msgs3 <- dtlog_messages(quote(DT[mpg > 20, .(car, mpg = as.integer(mpg))]))
+  expect_match(msgs3[1L], "^filter: removed 18 rows")
+  expect_match(msgs3[3L], "converted 'mpg' from double to integer$")
+
+  # excluding columns by name is still a select
+  expect_identical(dtlog_messages(quote(DT[, !c("vs", "am")])),
+                   "select: dropped 2 variables (vs, am)")
+  expect_identical(dtlog_messages(quote(DT[, -c("vs", "am")])),
+                   "select: dropped 2 variables (vs, am)")
+  expect_identical(dtlog_messages(quote(DT[, !"vs"])),
+                   "select: dropped one variable (vs)")
+  # -mpg negates the column, it does not leave it out
+  expect_match(dtlog_messages(quote(DT[, -mpg]))[1L], "^summarize: returned double")
+
+  # DT[, ..cols] takes the names from a variable and is a select as well
+  expect_match(dtlog_messages(quote(DT[, ..cols]))[1L],
+               "^select: dropped 10 variables \\(car, mpg, cyl, disp, drat, …\\)$")
+  msgs4 <- dtlog_messages(quote(DT[mpg > 20, ..cols]))
+  expect_match(msgs4[1L], "^filter: removed 18 rows")
+  expect_match(msgs4[2L], "^select: dropped 10 variables")
 })
 
 test_that("the special variables are reported through the surrounding call", {

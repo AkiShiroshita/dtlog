@@ -279,14 +279,21 @@ comes back as ``dt[, `:=`(kpl, mpg * 0.425)]``. Both forms run.
 
 ## When i and j do different things
 
-The number of rows in the result of `DT[i, j]` is not the number of rows `i`
-selected, unless `j` only picks columns. dtlog checks which of the two it is
-and does not blame the row count on `i` when `j` aggregates.
+The number of rows in the result of `DT[i, j]` is not always the number of
+rows `i` selected. Without `by=`, an aggregating `j` collapses the result into
+a single row, so a result that is longer than that was shaped by `i` and the
+two are reported one after the other. Where a filter and an aggregation do
+meet, the row count is not blamed on `i`.
 
 ```r
 dt[mpg > 20, .(car, mpg)]        # j selects columns, so the rows come from i
 #> filter: removed 18 rows (56%), 14 rows remaining
 #> select: dropped 10 variables (cyl, disp, hp, drat, wt, …)
+
+dt[mpg > 20, .(car, kpl = mpg * 0.425)]   # j computes one, the rows still come from i
+#> filter: removed 18 rows (56%), 14 rows remaining
+#> mutate: new variable 'kpl' (double) with 10 unique values and 0% NA
+#>         dropped 11 variables (mpg, cyl, disp, hp, drat, …)
 
 dt[mpg > 20, .(m = mean(mpg))]   # j aggregates
 #> summarize: now one row and one column (was 32 rows and 12 columns, after filtering with i)
