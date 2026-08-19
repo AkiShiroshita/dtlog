@@ -1,12 +1,39 @@
-^\.devcontainer$
-^\.github$
+# Files that must not go into the tarball CRAN receives.
+# Anything listed here is a Perl regular expression matched against the path
+# relative to the package root.
+
+# RStudio / IDE state
 ^.*\.Rproj$
 ^\.Rproj\.user$
+
+# Version control, CI and the dev container
+^\.git$
+^\.gitignore$
+^\.github$
+^\.devcontainer$
+^\.claude$
+
+# pkgdown: the config and the rendered site are development artefacts
+^_pkgdown\.yml$
+^docs$
+^pkgdown$
+
+# GitHub/Zenodo citation metadata: not a place R looks for citations, and
+# R CMD check --as-cran flags it both as a non-standard top-level file and as
+# a CITATION file outside inst/. Keep it in the repo, out of the tarball.
+^CITATION\.cff$
+
+# Check and build output
 ^dtlog\.Rcheck$
 ^dtlog_.*\.tar\.gz$
+^doc$
+^Meta$
+^revdep$
+^CRAN-SUBMISSION$
+
+# Development notes and scratch output
 ^LICENSE\.md$
 ^cran-comments\.md$
 ^TODO\.md$
-^doc$
-^Meta$
-^\.claude$
+^figures$
+(^|/)Rplots\.(ps|pdf)$

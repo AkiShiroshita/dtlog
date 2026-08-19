@@ -49,11 +49,11 @@ Useful links:
 
 }
 \author{
-\strong{Maintainer}: Akihiro Shiroshita \email{akihirokun8@gmail.com} [copyright holder]
+\strong{Maintainer}: Akihiro Shiroshita \email{akihirokun8@gmail.com} (\href{https://orcid.org/0000-0003-0262-459X}{ORCID}) [copyright holder]
 
 Authors:
 \itemize{
-  \item Akihiro Shiroshita \email{akihirokun8@gmail.com} [copyright holder]
+  \item Akihiro Shiroshita \email{akihirokun8@gmail.com} (\href{https://orcid.org/0000-0003-0262-459X}{ORCID}) [copyright holder]
 }
 
 }
