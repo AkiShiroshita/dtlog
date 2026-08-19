@@ -2,12 +2,16 @@
 set -euo pipefail
 
 export DEBIAN_FRONTEND=noninteractive
+export LANG=C.UTF-8
+export LC_ALL=C.UTF-8
 
 # System dependencies
 sudo apt-get update
 sudo apt-get install -y \
   build-essential \
   git \
+  r-base \
+  r-base-dev \
   libcurl4-openssl-dev \
   libssl-dev \
   libxml2-dev \
@@ -16,7 +20,7 @@ sudo apt-get install -y \
   libfribidi-dev \
   libfreetype6-dev \
   libpng-dev \
-  libtiff5-dev \
+  libtiff-dev \
   libjpeg-dev \
   zlib1g-dev \
   libgit2-dev \
@@ -56,7 +60,14 @@ if ! command -v codex >/dev/null 2>&1; then
   npm install -g @openai/codex
 fi
 
+# Install Claude Code CLI if needed
+if ! command -v claude >/dev/null 2>&1; then
+  npm install -g @anthropic-ai/claude-code
+fi
+
 # Friendly final check
 Rscript -e "pkgs <- c('usethis','devtools','roxygen2','testthat','pkgdown','fs','sass','pkgload','profvis','bslib','shiny','rmarkdown','htmlwidgets','miniUI','textshaping'); print(sapply(pkgs, function(p) if (requireNamespace(p, quietly=TRUE)) as.character(packageVersion(p)) else 'MISSING'))"
 command -v codex
 codex --version
+command -v claude
+claude --version
