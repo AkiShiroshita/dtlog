@@ -1,0 +1,26 @@
+cff-version: 1.2.0
+title: "dtlog: Logging for 'data.table' Operations"
+version: 0.1.0
+date-released: 2026-08-19
+
+authors:
+  - family-names: "Shiroshita"
+    given-names: "Akihiro"
+    email: "akihirokun8@gmail.com"
+    orcid: "https://orcid.org/0000-0003-0262-459X"
+
+repository-code: "https://github.com/AkiShiroshita/dtlog"
+url: "https://akishiroshita.github.io/dtlog/"
+license: "MIT"
+keywords:
+  - R
+  - data.table
+  - logging
+  - reproducibility
+
+abstract: >
+  An R package that prints a short message describing what each 'data.table'
+  operation did: how many rows a filter removed, which columns were added,
+  updated or dropped, how many groups an aggregation produced, and how a join
+  matched. The operations themselves are left untouched, including
+  modification by reference.

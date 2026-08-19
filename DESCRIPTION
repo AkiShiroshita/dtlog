@@ -4,7 +4,8 @@ Title: Logging for 'data.table' Operations
 Version: 0.1.0
 Authors@R:
     person("Akihiro", "Shiroshita", , "akihirokun8@gmail.com",
-           role = c("aut", "cre", "cph"))
+           role = c("aut", "cre", "cph"),
+           comment = c(ORCID = "0000-0003-0262-459X"))
 Description: Provides feedback about 'data.table' operations. 'dtlog' redefines
     the subsetting method for data tables as well as several functions exported
     by 'data.table' so that each operation prints a short message describing
@@ -22,6 +23,7 @@ Suggests: testthat (>= 3.0.0), dplyr, tidyr, tidylog, tibble, knitr,
     rmarkdown
 Config/testthat/edition: 3
 VignetteBuilder: knitr
-URL: https://github.com/AkiShiroshita/dtlog
+URL: https://github.com/AkiShiroshita/dtlog,
+    https://akishiroshita.github.io/dtlog/
 BugReports: https://github.com/AkiShiroshita/dtlog/issues
 Config/roxygen2/version: 8.1.0

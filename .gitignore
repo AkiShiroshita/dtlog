@@ -21,4 +21,6 @@ Rplots.pdf
 inst/doc/
 /doc/
 /Meta/
-docs
+
+# pkgdown site, rendered locally and published from the gh-pages branch
+/docs/

@@ -1,0 +1,35 @@
+url: https://akishiroshita.github.io/dtlog/
+
+template:
+  bootstrap: 5
+
+reference:
+  - title: Logged subsetting
+    desc: >
+      The method every `DT[i, j, by]` call goes through.
+    contents:
+      - "[.data.table"
+  - title: Logged 'data.table' functions
+    desc: >
+      Wrappers around the functions 'data.table' exports. Each one prints a
+      message and then dispatches to the 'data.table' implementation.
+    contents:
+      - as.data.table
+      - merge.data.table
+      - reshape
+      - rows
+      - set_functions
+      - head_tail
+      - fread
+      - fwrite
+  - title: Describing a table
+    contents:
+      - table
+      - dtlog_summary
+  - title: Transcripts and control
+    contents:
+      - dt_log
+      - dtlog_pause
+  - title: Package
+    contents:
+      - dtlog-package
