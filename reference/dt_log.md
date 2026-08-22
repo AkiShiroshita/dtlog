@@ -108,9 +108,9 @@ dt[, kpl := mpg * 0.425]
 #>       mpg   cyl  disp    hp  drat    wt  qsec    vs    am  gear  carb     kpl
 #>     <num> <num> <num> <num> <num> <num> <num> <num> <num> <num> <num>   <num>
 dt_log_end()
-#> dt_log: wrote 2 operations to '/tmp/RtmpIlgO7R/file1944ea70122.txt'
+#> dt_log: wrote 2 operations to '/tmp/RtmpPx8cA1/file18d6d81f0d4.txt'
 cat(readLines(path), sep = "\n")
-#> # dtlog transcript, started 2026-08-22 10:19:10
+#> # dtlog transcript, started 2026-08-22 10:32:11
 #> # R version 4.6.1 (2026-06-24), data.table 1.18.4, dtlog 0.1.0
 #> > dt[mpg > 20]
 #> filter: removed 18 rows (56%), 14 rows remaining
@@ -118,5 +118,5 @@ cat(readLines(path), sep = "\n")
 #> > dt[, `:=`(kpl, mpg * 0.425)]
 #> mutate: new variable 'kpl' (double) with 25 unique values and 0% NA
 #> 
-#> # dtlog transcript, ended 2026-08-22 10:19:10 (2 operations)
+#> # dtlog transcript, ended 2026-08-22 10:32:11 (2 operations)
 ```

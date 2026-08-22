@@ -27,5 +27,5 @@ fwrite(x, ...)
 ``` r
 dt <- data.table::data.table(a = 1:2, b = 3:4)
 fwrite(dt, tempfile())
-#> fwrite: wrote 2 rows and 2 columns to 'file194431cb39d0'
+#> fwrite: wrote 2 rows and 2 columns to 'file18d62f4a8ee9'
 ```

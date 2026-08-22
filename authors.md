@@ -8,7 +8,7 @@
 ## Citation
 
 Source:
-[`DESCRIPTION`](https://github.com/AkiShiroshita/dtlog/blob/main/DESCRIPTION)
+[`DESCRIPTION`](https://github.com/AkiShiroshita/dtlog/blob/v0.1.0/DESCRIPTION)
 
 Shiroshita A (2026). *dtlog: Logging for 'data.table' Operations*. R
 package version 0.1.0, <https://github.com/AkiShiroshita/dtlog>.
