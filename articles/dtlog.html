@@ -124,9 +124,9 @@ and reading it back shows the file end of things.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">path</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span>fileext <span class="op">=</span> <span class="st">".csv"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/fwrite.html">fwrite</a></span><span class="op">(</span><span class="va">patients</span>, <span class="va">path</span><span class="op">)</span></span>
-<span><span class="co">#&gt; fwrite: wrote 19 rows and 4 columns to 'file1b64140863b8.csv'</span></span>
+<span><span class="co">#&gt; fwrite: wrote 19 rows and 4 columns to 'file1acf2630e828.csv'</span></span>
 <span><span class="va">patients</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/fread.html">fread</a></span><span class="op">(</span><span class="va">path</span><span class="op">)</span></span>
-<span><span class="co">#&gt; fread: read 19 rows and 4 columns from 'file1b64140863b8.csv'</span></span></code></pre></div>
+<span><span class="co">#&gt; fread: read 19 rows and 4 columns from 'file1acf2630e828.csv'</span></span></code></pre></div>
 <p><code><a href="../reference/fread.html">fread()</a></code> reports what it read and from where,
 <code><a href="../reference/fwrite.html">fwrite()</a></code> what it wrote. Both messages name the file, which
 is the part that is easy to get wrong in a script that builds paths.</p>
@@ -270,11 +270,11 @@ did to the data, next to the code that did it.</p>
 <span><span class="co">#&gt; summarize: now 4 rows and 4 columns (was 46 rows and 9 columns)</span></span>
 <span></span>
 <span><span class="fu"><a href="../reference/dt_log.html">dt_log_end</a></span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="co">#&gt; dt_log: wrote 3 operations to '/tmp/RtmpMfhXME/file1b642edc44b0.txt'</span></span></code></pre></div>
+<span><span class="co">#&gt; dt_log: wrote 3 operations to '/tmp/Rtmpvzi71a/file1acf783d94f3.txt'</span></span></code></pre></div>
 <p>The file holds the calls as R deparses them, with their messages
 underneath:</p>
 <div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" tabindex="-1"></a><span class="fu">cat</span>(<span class="fu">readLines</span>(log_path), <span class="at">sep =</span> <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span>
-<span id="cb14-2"><a href="#cb14-2" tabindex="-1"></a><span class="co"># dtlog transcript, started 2026-08-22 09:44:08</span></span>
+<span id="cb14-2"><a href="#cb14-2" tabindex="-1"></a><span class="co"># dtlog transcript, started 2026-08-22 10:19:14</span></span>
 <span id="cb14-3"><a href="#cb14-3" tabindex="-1"></a><span class="co"># R version 4.6.1 (2026-06-24), data.table 1.18.4, dtlog 0.1.0</span></span>
 <span id="cb14-4"><a href="#cb14-4" tabindex="-1"></a><span class="sc">&gt;</span> merged[<span class="sc">!</span><span class="fu">is.na</span>(crp)]</span>
 <span id="cb14-5"><a href="#cb14-5" tabindex="-1"></a>filter<span class="sc">:</span> removed <span class="dv">5</span> <span class="fu">rows</span> (<span class="dv">10</span>%), <span class="dv">46</span> rows remaining</span>
@@ -286,7 +286,7 @@ underneath:</p>
 <span id="cb14-11"><a href="#cb14-11" tabindex="-1"></a>group_by<span class="sc">:</span> <span class="dv">2</span> grouping <span class="fu">variables</span> (arm, sex)</span>
 <span id="cb14-12"><a href="#cb14-12" tabindex="-1"></a>summarize<span class="sc">:</span> now <span class="dv">4</span> rows and <span class="dv">4</span> <span class="fu">columns</span> (was <span class="dv">46</span> rows and <span class="dv">9</span> columns)</span>
 <span id="cb14-13"><a href="#cb14-13" tabindex="-1"></a></span>
-<span id="cb14-14"><a href="#cb14-14" tabindex="-1"></a><span class="co"># dtlog transcript, ended 2026-08-22 09:44:08 (3 operations)</span></span></code></pre></div>
+<span id="cb14-14"><a href="#cb14-14" tabindex="-1"></a><span class="co"># dtlog transcript, ended 2026-08-22 10:19:14 (3 operations)</span></span></code></pre></div>
 <p><code>dt_log(append = TRUE)</code> adds to an existing file,
 <code>code = FALSE</code> writes the messages without the calls, and
 <code>echo = FALSE</code> writes only to the file and leaves the console
