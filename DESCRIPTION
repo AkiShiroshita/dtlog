@@ -23,7 +23,7 @@ Imports: data.table (>= 1.14.0), stats, utils
 Suggests: testthat (>= 3.0.0), dplyr, tidyr, tidylog, tibble, knitr,
     rmarkdown
 Config/testthat/edition: 3
-VignetteBuilder: knitr
+VignetteBuilder: knitr, rmarkdown
 URL: https://github.com/AkiShiroshita/dtlog,
     https://akishiroshita.github.io/dtlog/
 BugReports: https://github.com/AkiShiroshita/dtlog/issues
