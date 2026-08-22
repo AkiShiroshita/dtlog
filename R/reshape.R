@@ -23,7 +23,9 @@ melt <- function(data, ...) {
 }
 
 #' @rdname reshape
+#' @method melt data.table
 #' @rawNamespace export("melt.data.table")
+#' @export
 melt.data.table <- function(data, ...) {
   logged("melt.data.table", sys.call(), parent.frame(), log_melt,
          if (missing(data)) NULL else list(data = data))
@@ -37,7 +39,9 @@ dcast <- function(data, ...) {
 }
 
 #' @rdname reshape
+#' @method dcast data.table
 #' @rawNamespace export("dcast.data.table")
+#' @export
 dcast.data.table <- function(data, ...) {
   logged("dcast.data.table", sys.call(), parent.frame(), log_dcast,
          if (missing(data)) NULL else list(data = data))

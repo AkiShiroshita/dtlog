@@ -35,7 +35,7 @@ effect.
     from the global environment, so that `data.table` calls inside other
     packages stay silent.}
   \item{`dtlog.table_max_unique`}{`20` (default). A column with this many
-    unique values or more is described by [table()] as possibly continuous
+    unique values or more is described by [dttable()] as possibly continuous
     instead of having its values listed. `Inf` lists every column.}
 }
 }
@@ -44,6 +44,7 @@ effect.
 Useful links:
 \itemize{
   \item \url{https://github.com/AkiShiroshita/dtlog}
+  \item \url{https://akishiroshita.github.io/dtlog/}
   \item Report bugs at \url{https://github.com/AkiShiroshita/dtlog/issues}
 }
 

@@ -11,9 +11,10 @@
   `dcast()`, `as.data.table()`, `fread()`, `fwrite()`, the `set*()` family and
   the set operations `funion()`, `fintersect()` and `fsetdiff()`.
 
-* `table()` describes the variables of a single data table -- one row per
+* `dttable()` describes the variables of a single data table -- one row per
   column, with the number of unique values and the values themselves -- and
-  passes every other call on to `base::table()` unchanged.
+  passes every other call on to `base::table()` unchanged. It is a function of
+  its own; `dtlog` does not mask `base::table()`.
 
 * `dt_log()` and `dt_log_end()` write the messages to a transcript file,
   `dt_log_file()` reports where it is going, and `dtlog_summary()` reports the

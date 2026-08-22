@@ -12,11 +12,12 @@ Description: Provides feedback about 'data.table' operations. 'dtlog' redefines
     what it did: how many rows were removed, which columns were added, updated
     or dropped, how many groups an aggregation produced, and so on. The
     operations themselves are left untouched, including modification by
-    reference. It also extends 'table()': given a single data table it
-    describes the variables the table holds, and every other call is passed
-    on to base::table() unchanged. Inspired by the 'tidylog' package.
+    reference. It also provides dttable(), which describes the variables a
+    single data table holds and passes every other call on to base::table()
+    unchanged. Inspired by the 'tidylog' package.
 License: MIT + file LICENSE
 Encoding: UTF-8
+Language: en-US
 Depends: R (>= 3.5.0)
 Imports: data.table (>= 1.14.0), stats, utils
 Suggests: testthat (>= 3.0.0), dplyr, tidyr, tidylog, tibble, knitr,

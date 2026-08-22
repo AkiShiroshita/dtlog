@@ -10,11 +10,11 @@
 \usage{
 melt(data, ...)
 
-melt.data.table(data, ...)
+\method{melt}{data.table}(data, ...)
 
 dcast(data, ...)
 
-dcast.data.table(data, ...)
+\method{dcast}{data.table}(data, ...)
 }
 \arguments{
 \item{data}{The table to reshape.}

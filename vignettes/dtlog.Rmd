@@ -183,7 +183,7 @@ merged[age >= 65, .(mean_sbp = mean(sbp_mmhg)), by = arm]
 The same holds in a pipe. `x |> f(y)` reaches `dtlog` as an ordinary call to
 `f(x, y)`, so a piped chain logs exactly like a nested one:
 
-```{r pipe}
+```{r pipe, eval = getRversion() >= "4.3.0"}
 merged[arm == "treatment"] |>
   _[, .(mean_crp = mean(crp, na.rm = TRUE)), by = sex]
 ```

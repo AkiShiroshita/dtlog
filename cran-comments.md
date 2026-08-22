@@ -39,11 +39,12 @@ New submission
 ```
 
 The words 'dtlog' and 'tidylog' in the DESCRIPTION are package names and are
-quoted as required.
+quoted as required. `dttable()` and `base::table()` in the Description field
+are function names, so they are not quoted.
 
 `R CMD check` reports OK for every other check, including the examples, the
-vignette and the test suite (testthat edition 3, 90 tests and 778 expectations
-across 9 files, none failing and none skipped).
+vignette and the test suite (testthat edition 3, 818 expectations across 10
+files, none failing).
 
 ## Notes for the reviewer
 
@@ -58,11 +59,13 @@ is unchanged; `tests/testthat/test-parity.R` and
 plain 'data.table'. This mirrors the approach taken by the 'tidylog' package,
 which is already on CRAN.
 
-The package also exports `table()`, which masks `base::table()`. It adds one
-behaviour: a single 'data.table' is described (one row per column, with the
-number of unique values and the values themselves). Every other call is passed
-on to `base::table()` unchanged, and `tests/testthat/test-table.R` checks that
-those calls return exactly what `base::table()` returns.
+The package also provides `dttable()`, which describes a single 'data.table'
+(one row per column, with the number of unique values and the values
+themselves). `dttable()` is a function of its own and masks nothing: no
+function in 'base' is affected by attaching 'dtlog'. Every call that is not a
+single 'data.table' is passed on to `base::table()` unchanged, and
+`tests/testthat/test-dttable.R` checks that those calls return exactly what
+`base::table()` returns.
 
 The package writes no files and changes no global options on load. Logging can
 be turned off with `dtlog_pause()`.

@@ -1,16 +1,16 @@
-#' Tabulate, or describe the variables of a data table
+#' Describe the variables of a data table
 #'
-#' `table()` is [base::table()] with one addition: given a single `data.table`
-#' it describes the table instead of cross tabulating it. It reports one row
-#' per column -- the name, the number of unique values, and the values
-#' themselves -- and returns that description as a `data.table` with the
-#' columns `Variable`, `N_unique` and `Unique_value`.
+#' `dttable()` describes a `data.table` rather than cross tabulating it. Given a
+#' single `data.table` it reports one row per column -- the name, the number of
+#' unique values, and the values themselves -- and returns that description as a
+#' `data.table` with the columns `Variable`, `N_unique` and `Unique_value`.
 #'
-#' Every other call is passed on to [base::table()] unchanged, so
-#' `table(dt$sex, dt$death)`, `table(x, useNA = "ifany")` and
-#' `table(as.data.frame(dt))` keep working exactly as they do without `dtlog`.
-#' The description is the only new behaviour, and only a single `data.table`
-#' triggers it.
+#' `dttable()` is a function of its own: it does not mask [base::table()], and
+#' loading `dtlog` leaves `table()` exactly as it was. Every call that is not a
+#' single `data.table` is handed to [base::table()] unchanged, so
+#' `dttable(dt$sex, dt$death)`, `dttable(x, useNA = "ifany")` and
+#' `dttable(as.data.frame(dt))` return what [base::table()] returns. Describing
+#' a single `data.table` is the only thing `dttable()` adds.
 #'
 #' A column with 20 or more unique values is reported as *possibly continuous*
 #' rather than listed; the option `dtlog.table_max_unique` moves that point,
@@ -41,10 +41,10 @@
 #'   anything else, whatever [base::table()] returns.
 #' @seealso [dtlog_summary()] for the size and key of a table alone.
 #' @examples
-#' table(data.table::data.table(a = 1:3, b = c("x", "y", "x")))
-#' table(c("a", "b", "a"))
-#' @rawNamespace export("table")
-table <- function(...) {
+#' dttable(data.table::data.table(a = 1:3, b = c("x", "y", "x")))
+#' dttable(c("a", "b", "a"))
+#' @export
+dttable <- function(...) {
   # ..1 forces the first argument, exactly once: the base branch is handed the
   # same (already evaluated) promise, so an argument with a side effect runs
   # the same number of times as it does in base::table().
@@ -183,7 +183,7 @@ trim_to_width <- function(x, width) {
 # ---- output ----------------------------------------------------------------
 
 display_description <- function(x, out) {
-  display_block("table: ", c(
+  display_block("dttable: ", c(
     sprintf("%s and %s", plural(nrow(x), "row"), plural(ncol(x), "column")),
     description_lines(out)
   ))

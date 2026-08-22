@@ -24,7 +24,7 @@ reference:
       - fwrite
   - title: Describing a table
     contents:
-      - table
+      - dttable
       - dtlog_summary
   - title: Transcripts and control
     contents:

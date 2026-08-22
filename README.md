@@ -1,4 +1,4 @@
-# dtlog
+# dtlog <img src="man/figures/logo.png" align="right" height="139" alt="" />
 
 `data.table` is fast and memory-efficient. It is particularly powerful for large datasets. 
 
@@ -62,6 +62,7 @@ setkey(dt, cyl)
 ```r
 # install.packages("remotes")
 remotes::install_github("AkiShiroshita/dtlog")
+```
 
 ## Load order
 
@@ -104,19 +105,20 @@ conflict_prefer("setnames", "dtlog")
 | `set()`, `setDT()`, `setDF()`, `setattr()`                                            | what was changed by reference                                                                                           |
 | `fread()`, `fwrite()`                                                                     | rows, columns and the file name                                                                                         |
 | `as.data.table()`                                                                           | the class it converted from and the resulting size                                                                      |
-| `table(DT)`                                                                                  | one row per column: its name, how many unique values it has, and the values themselves                                  |
+| `dttable(DT)`                                                                                  | one row per column: its name, how many unique values it has, and the values themselves                                  |
 
 ## Describing the variables of a table
 
-`table()` is `base::table()` with one addition: given a single `data.table` it
-describes the table instead of cross tabulating it. Each column becomes one row
--- its name, how many unique values it holds, and the values themselves -- and
-the description is returned as a `data.table` so it can be kept, written out or
-printed again.
+`dttable()` describes a `data.table` rather than cross tabulating it. Each
+column becomes one row -- its name, how many unique values it holds, and the
+values themselves -- and the description is returned as a `data.table` so it
+can be kept, written out or printed again. It is a function of its own:
+`dtlog` does not mask `base::table()`, and `table()` keeps working exactly as
+it did.
 
 ```r
-table(dt)
-#> table: 32 rows and 12 columns
+dttable(dt)
+#> dttable: 32 rows and 12 columns
 #>         Variable N_unique                            Unique_value
 #>              car       32 20+ unique values — possibly continuous
 #>              mpg       25 20+ unique values — possibly continuous
@@ -142,8 +144,8 @@ and both are counted in `N_unique`; an empty string is a value of its own, not
 a missing one.
 
 ```r
-table(dat)
-#> table: 4 rows and 4 columns
+dttable(dat)
+#> dttable: 4 rows and 4 columns
 #>         Variable N_unique                    Unique_value
 #>              num        3                   1; 2; Missing
 #>              chr        3                   a; b; Missing
@@ -154,13 +156,14 @@ table(dat)
 The description goes through the same output as every other message, so
 `dt_log()` records it as well.
 
-Only a single `data.table` triggers this. Every other call is passed straight
-on to `base::table()`, so nothing that worked before changes:
+Only a single `data.table` triggers the description. Every other call is
+passed straight on to `base::table()`, so `dttable()` can stand in for
+`table()` anywhere:
 
 ```r
-table(dt$cyl, dt$gear)       # the contingency table, as always
-table(df$sex, df$death)      # a data.frame column is not a data.table either
-table(as.data.frame(dt))     # and this is still base's cross tabulation
+dttable(dt$cyl, dt$gear)       # the contingency table, as always
+dttable(df$sex, df$death)      # a data.frame column is not a data.table either
+dttable(as.data.frame(dt))     # and this is still base's cross tabulation
 ```
 
 ## Pipes
