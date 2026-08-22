@@ -4,30 +4,28 @@ This is the first submission of 'dtlog' (version 0.1.0).
 
 ## Test environments
 
-* local: Windows 11 x64 (build 26200), R 4.6.0 (2026-04-24 ucrt), platform
-  x86_64-w64-mingw32, 'data.table' 1.18.4 -- `R CMD build` followed by
-  `R CMD check --as-cran` on the resulting tarball -- Status: 1 NOTE
-  (2026-08-18).
-
 * win-builder, R release 4.6.1 (2026-06-24 ucrt), Windows Server 2022 x64
-  (build 20348) -- Status: 1 NOTE (2026-08-18).
+  (build 20348), x86_64-w64-mingw32 -- Status: 1 NOTE (2026-08-22).
 
-* win-builder, R Under development (unstable) (2026-08-17 r90424 ucrt),
-  Windows Server 2022 x64 (build 20348) -- Status: 1 NOTE (2026-08-18).
+* win-builder, R Under development (unstable) (2026-08-21 r90440 ucrt),
+  Windows Server 2022 x64 (build 20348), x86_64-w64-mingw32 -- Status: 1 NOTE
+  (2026-08-22).
 
-* GitHub Actions, `R CMD check --as-cran` (2026-08-18) on each of:
+* GitHub Actions, `R CMD check --as-cran` (2026-08-22) -- Status: OK on each
+  of:
 
-  * Ubuntu 24.04, R-devel
-  * Ubuntu 24.04, R release
-  * Ubuntu 24.04, R oldrel-1
-  * macOS (aarch64-apple-darwin23), R 4.6.1
-  * Windows Server, R release
+  * Ubuntu 24.04.4 LTS, x86_64-pc-linux-gnu, R-devel (2026-06-21 r90185)
+  * Ubuntu 24.04.4 LTS, x86_64-pc-linux-gnu, R 4.6.1 (2026-06-24)
+  * Ubuntu 24.04.4 LTS, x86_64-pc-linux-gnu, R 4.5.3 (2026-03-11), oldrel-1
+  * macOS Tahoe 26.5.2, aarch64-apple-darwin23, R 4.6.1 (2026-06-24)
+  * Windows Server 2022 x64 (build 26100), x86_64-w64-mingw32,
+    R 4.6.1 (2026-06-24 ucrt)
 
 ## R CMD check results
 
 Every GitHub Actions platform above reports Status: OK -- 0 errors, 0 warnings,
 0 notes. Both win-builder runs (R-release and R-devel) report 0 errors |
-0 warnings | 1 note, and locally the result is 0 errors | 0 warnings | 1 note.
+0 warnings | 1 note.
 
 The note is the expected one for a package not yet on CRAN:
 
@@ -42,9 +40,10 @@ The words 'dtlog' and 'tidylog' in the DESCRIPTION are package names and are
 quoted as required. `dttable()` and `base::table()` in the Description field
 are function names, so they are not quoted.
 
-`R CMD check` reports OK for every other check, including the examples, the
-vignette and the test suite (testthat edition 3, 818 expectations across 10
-files, none failing).
+`R CMD check` reports OK for every other check on every platform above,
+including the examples, the vignette, the PDF and HTML versions of the manual,
+and the test suite (testthat edition 3, 818 expectations across 10 files, none
+failing).
 
 ## Notes for the reviewer
 
