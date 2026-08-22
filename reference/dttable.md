@@ -1,0 +1,78 @@
+# Describe the variables of a data table
+
+\`dttable()\` describes a \`data.table\` rather than cross tabulating
+it. Given a single \`data.table\` it reports one row per column – the
+name, the number of unique values, and the values themselves – and
+returns that description as a \`data.table\` with the columns
+\`Variable\`, \`N_unique\` and \`Unique_value\`.
+
+## Usage
+
+``` r
+dttable(...)
+```
+
+## Arguments
+
+- ...:
+
+  The vectors to tabulate, as in \[base::table()\], or a single
+  \`data.table\` to describe.
+
+## Value
+
+For a single \`data.table\`, a \`data.table\` with the columns
+\`Variable\`, \`N_unique\` and \`Unique_value\`, returned invisibly. For
+anything else, whatever \[base::table()\] returns.
+
+## Details
+
+\`dttable()\` is a function of its own: it does not mask
+\[base::table()\], and loading \`dtlog\` leaves \`table()\` exactly as
+it was. Every call that is not a single \`data.table\` is handed to
+\[base::table()\] unchanged, so \`dttable(dt\$sex, dt\$death)\`,
+\`dttable(x, useNA = "ifany")\` and \`dttable(as.data.frame(dt))\`
+return what \[base::table()\] returns. Describing a single
+\`data.table\` is the only thing \`dttable()\` adds.
+
+A column with 20 or more unique values is reported as \*possibly
+continuous\* rather than listed; the option \`dtlog.table_max_unique\`
+moves that point, and \`Inf\` lists every column however many values it
+holds. A list column is reported as such, and a list of values longer
+than 80 characters is truncated.
+
+The values are listed in the order the column sorts in: numbers
+ascending, characters alphabetically, dates and times chronologically,
+factors and ordered factors by their levels, \`FALSE\` before \`TRUE\`.
+Each value is written the way its own class writes it, so an \`ITime\`
+is listed as \`09:00:00\` rather than as the seconds it is stored as. A
+type that cannot be sorted keeps the order its values appear in.
+
+Missing values are listed and counted like any other value: \`NA\`
+(including \`NA\` as a level of a factor) appears as \`Missing\`,
+\`NaN\` as \`NaN\`, and both are counted in \`N_unique\`. They sort
+last, so a column that has any ends with \`Missing\`. An empty string is
+a value of its own, not a missing one.
+
+The description goes through the same output as every other \`dtlog\`
+message, so it obeys \`dtlog.display\`, is silenced by
+\[dtlog_pause()\], and is written to the transcript opened by
+\[dt_log()\].
+
+## See also
+
+\[dtlog_summary()\] for the size and key of a table alone.
+
+## Examples
+
+``` r
+dttable(data.table::data.table(a = 1:3, b = c("x", "y", "x")))
+#> dttable: 3 rows and 2 columns
+#>           Variable N_unique Unique_value
+#>                  a        3      1; 2; 3
+#>                  b        2         x; y
+dttable(c("a", "b", "a"))
+#> 
+#> a b 
+#> 2 1 
+```
