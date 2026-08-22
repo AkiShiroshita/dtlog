@@ -21,10 +21,19 @@ This is the first submission of 'dtlog' (version 0.1.0).
   * Windows Server 2022 x64 (build 26100), x86_64-w64-mingw32,
     R 4.6.1 (2026-06-24 ucrt)
 
+* R-hub v2, `R CMD check` (2026-08-22) -- Status: OK on each of:
+
+  * macOS Sequoia 15.7.7, x86_64-apple-darwin20,
+    R-devel (2026-06-24 r90190)
+  * Ubuntu 22.04.5 LTS, x86_64-pc-linux-gnu, R-devel (2026-08-21 r90440),
+    built without long doubles ('nold')
+  * Fedora Linux 42, x86_64-pc-linux-gnu, R-devel (2026-06-21 r90185), with
+    the suggested packages made unavailable ('nosuggests')
+
 ## R CMD check results
 
-Every GitHub Actions platform above reports Status: OK -- 0 errors, 0 warnings,
-0 notes. Both win-builder runs (R-release and R-devel) report 0 errors |
+Every GitHub Actions and R-hub platform above reports Status: OK -- 0 errors,
+0 warnings, 0 notes. Both win-builder runs (R-release and R-devel) report 0 errors |
 0 warnings | 1 note.
 
 The note is the expected one for a package not yet on CRAN:
