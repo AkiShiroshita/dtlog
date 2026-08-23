@@ -5,11 +5,11 @@ This is the first submission of 'dtlog' (version 0.1.0).
 ## Test environments
 
 * win-builder, R release 4.6.1 (2026-06-24 ucrt), Windows Server 2022 x64
-  (build 20348), x86_64-w64-mingw32 -- Status: 1 NOTE (2026-08-22).
+  (build 20348), x86_64-w64-mingw32 -- Status: 1 NOTE (2026-08-23).
 
-* win-builder, R Under development (unstable) (2026-08-21 r90440 ucrt),
+* win-builder, R Under development (unstable) (2026-08-22 r90443 ucrt),
   Windows Server 2022 x64 (build 20348), x86_64-w64-mingw32 -- Status: 1 NOTE
-  (2026-08-22).
+  (2026-08-23).
 
 * GitHub Actions, `R CMD check --as-cran` (2026-08-22) -- Status: OK on each
   of:
