@@ -26,16 +26,16 @@ fintersect(x, y, ...)
 fsetdiff(x, y, ...)
 }
 \arguments{
-\item{x, y, object, l}{The inputs, as in the corresponding `data.table`
+\item{x, y, object, l}{The inputs, as in the corresponding \code{data.table}
 function.}
 
 \item{...}{All other arguments, passed on unchanged.}
 }
 \value{
-Whatever the `data.table` function returns.
+Whatever the \code{data.table} function returns.
 }
 \description{
-These functions behave exactly like their `data.table` counterparts and
+These functions behave exactly like their \code{data.table} counterparts and
 report how many rows they removed, kept or combined.
 }
 \examples{

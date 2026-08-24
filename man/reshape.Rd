@@ -19,16 +19,16 @@ dcast(data, ...)
 \arguments{
 \item{data}{The table to reshape.}
 
-\item{...}{All other arguments of [data.table::melt.data.table()] and
-[data.table::dcast.data.table()].}
+\item{...}{All other arguments of \code{\link[data.table:melt.data.table]{data.table::melt.data.table()}} and
+\code{\link[data.table:dcast.data.table]{data.table::dcast.data.table()}}.}
 }
 \value{
 The reshaped data table.
 }
 \description{
 Reports which columns were reorganized into which, and how the dimensions
-of the table changed, in the style of `tidylog`'s `pivot_longer()` and
-`pivot_wider()` messages.
+of the table changed, in the style of \code{tidylog}'s \code{pivot_longer()} and
+\code{pivot_wider()} messages.
 }
 \examples{
 dt <- data.table::data.table(id = 1:2, a = 3:4, b = 5:6)

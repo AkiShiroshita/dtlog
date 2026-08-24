@@ -13,30 +13,30 @@ dt_log_end()
 dt_log_file()
 }
 \arguments{
-\item{file}{Path of the text file. `NULL` ends the current transcript, so
-`dt_log(NULL)` is the same as `dt_log_end()`.}
+\item{file}{Path of the text file. \code{NULL} ends the current transcript, so
+\code{dt_log(NULL)} is the same as \code{dt_log_end()}.}
 
 \item{append}{Append to an existing file instead of overwriting it.}
 
-\item{code}{Write the call above its log. Set to `FALSE` for the messages
+\item{code}{Write the call above its log. Set to \code{FALSE} for the messages
 alone.}
 
-\item{echo}{Keep printing to the console as well. `FALSE` writes only to
+\item{echo}{Keep printing to the console as well. \code{FALSE} writes only to
 the file.}
 }
 \value{
 The path of the transcript, invisibly.
 }
 \description{
-`dt_log()` starts a transcript: from that point on, every operation that
+\code{dt_log()} starts a transcript: from that point on, every operation that
 dtlog reports is appended to a text file, together with the call that
-produced it. `dt_log_end()` closes the transcript. Start and end are up to
+produced it. \code{dt_log_end()} closes the transcript. Start and end are up to
 you; nothing is written before the first call or after the second.
 }
 \details{
-Each operation is appended with a plain [cat()] that opens and closes the
+Each operation is appended with a plain \code{\link[=cat]{cat()}} that opens and closes the
 file again, so the transcript stays readable while a long script is running
-and survives a session that ends without `dt_log_end()` (only the closing
+and survives a session that ends without \code{dt_log_end()} (only the closing
 line is then missing).
 }
 \examples{

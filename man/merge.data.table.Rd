@@ -9,16 +9,16 @@
 \arguments{
 \item{x, y}{The data tables to merge.}
 
-\item{...}{All other arguments of [data.table::merge.data.table()].}
+\item{...}{All other arguments of \code{\link[data.table:merge.data.table]{data.table::merge.data.table()}}.}
 }
 \value{
-The merged data table, exactly as [data.table::merge.data.table()]
-  returns it.
+The merged data table, exactly as \code{\link[data.table:merge.data.table]{data.table::merge.data.table()}}
+returns it.
 }
 \description{
 Reports the columns the merge added and how the rows of the two inputs were
-matched, in the style of `tidylog`'s join messages. The counts of unmatched
-rows are only computed when `options(dtlog.detail = "full")` (the default);
+matched, in the style of \code{tidylog}'s join messages. The counts of unmatched
+rows are only computed when \code{options(dtlog.detail = "full")} (the default);
 they cost two additional matching passes over the inputs.
 }
 \examples{

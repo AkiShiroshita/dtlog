@@ -13,11 +13,11 @@
 \arguments{
 \item{x}{The data table.}
 
-\item{...}{All other arguments of [utils::head()] and [utils::tail()], i.e.
-`n`.}
+\item{...}{All other arguments of \code{\link[utils:head]{utils::head()}} and \code{\link[utils:tail]{utils::tail()}}, i.e.
+\code{n}.}
 }
 \value{
-The same rows `data.table` would return.
+The same rows \code{data.table} would return.
 }
 \description{
 First or last rows of a data table, with a log

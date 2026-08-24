@@ -7,10 +7,10 @@
 fread(...)
 }
 \arguments{
-\item{...}{All arguments of [data.table::fread()].}
+\item{...}{All arguments of \code{\link[data.table:fread]{data.table::fread()}}.}
 }
 \value{
-The data table that [data.table::fread()] returns.
+The data table that \code{\link[data.table:fread]{data.table::fread()}} returns.
 }
 \description{
 Read a file into a data table, with a log

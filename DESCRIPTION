@@ -27,4 +27,5 @@ VignetteBuilder: knitr, rmarkdown
 URL: https://github.com/AkiShiroshita/dtlog,
     https://akishiroshita.github.io/dtlog/
 BugReports: https://github.com/AkiShiroshita/dtlog/issues
+Roxygen: list(markdown = TRUE)
 Config/roxygen2/version: 8.1.0

@@ -7,10 +7,10 @@
 dtlog_summary(.data)
 }
 \arguments{
-\item{.data}{A `data.table` (or any data frame).}
+\item{.data}{A \code{data.table} (or any data frame).}
 }
 \value{
-`.data`, unchanged and returned visibly.
+\code{.data}, unchanged and returned visibly.
 }
 \description{
 Prints the number of rows and columns of a data table, along with its key,
@@ -22,5 +22,5 @@ dt <- data.table::data.table(a = 1:3, b = 4:6)
 dtlog_summary(dt)
 }
 \seealso{
-[dt_log()] to write a transcript of a whole session to a file.
+\code{\link[=dt_log]{dt_log()}} to write a transcript of a whole session to a file.
 }

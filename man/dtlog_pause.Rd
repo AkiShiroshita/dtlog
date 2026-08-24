@@ -10,16 +10,16 @@ dtlog_pause()
 dtlog_resume()
 }
 \value{
-Invisibly the logging state *before* the call: `TRUE` if logging was
-  active, `FALSE` if it was paused. Both functions report the state they
-  found rather than the one they left behind, so `dtlog_pause()` returns
-  `TRUE` when it is the call that actually paused logging, and
-  `dtlog_resume()` returns `FALSE` when it is the call that actually
-  resumed it.
+Invisibly the logging state \emph{before} the call: \code{TRUE} if logging was
+active, \code{FALSE} if it was paused. Both functions report the state they
+found rather than the one they left behind, so \code{dtlog_pause()} returns
+\code{TRUE} when it is the call that actually paused logging, and
+\code{dtlog_resume()} returns \code{FALSE} when it is the call that actually
+resumed it.
 }
 \description{
-`dtlog_pause()` turns off all `dtlog` messages without detaching the
-package, `dtlog_resume()` turns them back on. This is useful for a block of
+\code{dtlog_pause()} turns off all \code{dtlog} messages without detaching the
+package, \code{dtlog_resume()} turns them back on. This is useful for a block of
 code that would otherwise produce a lot of output.
 }
 \examples{

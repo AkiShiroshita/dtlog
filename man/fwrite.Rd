@@ -9,10 +9,10 @@ fwrite(x, ...)
 \arguments{
 \item{x}{The table to write.}
 
-\item{...}{All other arguments of [data.table::fwrite()].}
+\item{...}{All other arguments of \code{\link[data.table:fwrite]{data.table::fwrite()}}.}
 }
 \value{
-`NULL`, invisibly, as [data.table::fwrite()] returns it.
+\code{NULL}, invisibly, as \code{\link[data.table:fwrite]{data.table::fwrite()}} returns it.
 }
 \description{
 Write a data table to a file, with a log

@@ -7,27 +7,27 @@
 \method{[}{data.table}(x, ...)
 }
 \arguments{
-\item{x}{A `data.table`.}
+\item{x}{A \code{data.table}.}
 
-\item{...}{All other arguments of `[.data.table`, i.e. `i`, `j`, `by`,
-`keyby`, `with`, `nomatch`, `mult`, `roll`, `rollends`, `which`,
-`.SDcols`, `verbose`, `allow.cartesian`, `drop`, `on`, `env` and
-`showProgress`. They are never touched by `dtlog`.}
+\item{...}{All other arguments of \verb{[.data.table}, i.e. \code{i}, \code{j}, \code{by},
+\code{keyby}, \code{with}, \code{nomatch}, \code{mult}, \code{roll}, \code{rollends}, \code{which},
+\code{.SDcols}, \code{verbose}, \code{allow.cartesian}, \code{drop}, \code{on}, \code{env} and
+\code{showProgress}. They are never touched by \code{dtlog}.}
 }
 \value{
-Whatever `data.table`'s `[` returns, with the same visibility.
+Whatever \code{data.table}'s \code{[} returns, with the same visibility.
 }
 \description{
-`dtlog` redefines the `[` method for data tables. The call is passed on to
-`data.table` unchanged -- same arguments, same evaluation environment, same
+\code{dtlog} redefines the \code{[} method for data tables. The call is passed on to
+\code{data.table} unchanged -- same arguments, same evaluation environment, same
 return value, same modification by reference -- and a message describing
 what happened is printed afterwards.
 }
 \details{
-Depending on the call, the message uses the vocabulary of `tidylog`:
-`filter` (rows removed by `i`), `arrange` (rows reordered), `join` (`i` is a
-table or `on=` was given), `select` (`j` only picks existing columns),
-`mutate` (`:=`), `group_by`/`summarize` (`by=`/`keyby=`).
+Depending on the call, the message uses the vocabulary of \code{tidylog}:
+\code{filter} (rows removed by \code{i}), \code{arrange} (rows reordered), \code{join} (\code{i} is a
+table or \verb{on=} was given), \code{select} (\code{j} only picks existing columns),
+\code{mutate} (\verb{:=}), \code{group_by}/\code{summarize} (\verb{by=}/\verb{keyby=}).
 }
 \examples{
 dt <- data.table::as.data.table(mtcars)

@@ -41,16 +41,16 @@ setDF(x, ...)
 setattr(x, ...)
 }
 \arguments{
-\item{x}{The data table (or, for [setDT()], the object to convert).}
+\item{x}{The data table (or, for \code{\link[=setDT]{setDT()}}, the object to convert).}
 
 \item{...}{All other arguments, passed on unchanged.}
 }
 \value{
-Whatever the corresponding `data.table` function returns.
+Whatever the corresponding \code{data.table} function returns.
 }
 \description{
-These functions are the `data.table` `set*()` functions. They still change
-their input by reference and return exactly what `data.table` returns; they
+These functions are the \code{data.table} \verb{set*()} functions. They still change
+their input by reference and return exactly what \code{data.table} returns; they
 only report what they changed.
 }
 \examples{

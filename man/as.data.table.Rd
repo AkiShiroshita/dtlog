@@ -9,10 +9,10 @@ as.data.table(x, ...)
 \arguments{
 \item{x}{The object to convert.}
 
-\item{...}{All other arguments of [data.table::as.data.table()].}
+\item{...}{All other arguments of \code{\link[data.table:as.data.table]{data.table::as.data.table()}}.}
 }
 \value{
-The `data.table` that [data.table::as.data.table()] returns.
+The \code{data.table} that \code{\link[data.table:as.data.table]{data.table::as.data.table()}} returns.
 }
 \description{
 Convert an object to a data table, with a log
