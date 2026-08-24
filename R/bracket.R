@@ -31,7 +31,11 @@
   env <- bracket_env(pf, cl, x)
   cl <- attr(env, "call")
   if (!should_log_call(pf)) return(eval_visible(cl, env))
-  info <- try_log(parse_bracket_call(cl, pf))
+  resolved <- try_log(resolve_bracket_args(cl, env, pf))
+  if (!is.list(resolved)) resolved <- list(cl = cl, values = list(),
+                                           positions = integer())
+  cl <- resolved$cl
+  info <- try_log(parse_bracket_call(cl, pf, resolved$positions, resolved$values))
   before <- try_log(snapshot_bracket(x, info))
   res <- withVisible(eval(cl, env))
   with_logged_call(written_call, try_log(log_bracket(x, res$value, info, before)))
@@ -68,6 +72,40 @@ bracket_env <- function(pf, cl, x) {
   }
   attr(env, "call") <- cl
   env
+}
+
+# `which=`, `with=` and the computed left hand side of a `(cols) :=` all say
+# how the result has to be read, and data.table evaluates each of them itself
+# when it runs the call. Each one is therefore evaluated once here and left in
+# the call as a value bound in `env`, so that an argument written as an
+# expression with a side effect runs exactly as often as it would without
+# dtlog. Everything else -- i, j, by, .SDcols, on -- is never evaluated by
+# dtlog at all.
+#
+# One match.call serves the whole method: the arguments resolved here and the
+# ones parse_bracket_call() only reads are all found through these positions.
+# Most calls carry none of the three, so each step is skipped when the call
+# does not have it; `[` is the hot path of the package.
+resolve_bracket_args <- function(cl, env, pf) {
+  pos <- arg_positions(cl, .dt$bracket)
+  wanted <- c("which", "with")
+  wanted <- wanted[wanted %in% names(pos)]
+  resolved <- if (length(wanted)) {
+    resolve_all(cl, NULL, wanted, pf, pos)
+  } else {
+    list(cl = cl, values = list(), bindings = list())
+  }
+  lhs <- resolve_assign_lhs(resolved$cl, position_of(pos, "j"), pf)
+  if (is.list(lhs)) {
+    resolved$cl <- lhs$cl
+    resolved$values["lhs"] <- list(lhs$value)
+    resolved$bindings[names(lhs$bindings)] <- lhs$bindings
+  }
+  for (nm in names(resolved$bindings)) {
+    assign(nm, resolved$bindings[[nm]], envir = env)
+  }
+  resolved$positions <- pos
+  resolved
 }
 
 eval_visible <- function(cl, env) {

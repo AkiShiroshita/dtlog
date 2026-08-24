@@ -1,5 +1,13 @@
 `%||%` <- function(x, y) if (is.null(x)) y else x
 
+# One element of a named list, by its exact name. `[[` stops when the name is
+# not there and `$` matches partially, and both are wrong for reading an
+# argument that the call may simply not have had (`all` next to `all.x`).
+element <- function(x, name) {
+  if (!is.list(x) || !(name %in% names(x))) return(NULL)
+  x[[name]]
+}
+
 # ---- output ----------------------------------------------------------------
 
 display_functions <- function() {

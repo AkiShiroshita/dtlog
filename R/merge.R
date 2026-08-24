@@ -19,7 +19,8 @@ merge.data.table <- function(x, y, ...) {
   values <- list()
   if (!missing(x)) values$x <- x
   if (!missing(y)) values$y <- y
-  logged("merge.data.table", sys.call(), parent.frame(), log_merge, values)
+  logged("merge.data.table", sys.call(), parent.frame(), log_merge, values,
+         args = c("by", "by.x", "by.y", "all", "all.x", "all.y"), match = TRUE)
 }
 
 log_merge <- function(out, before, cl, pf) {
@@ -27,13 +28,13 @@ log_merge <- function(out, before, cl, pf) {
   y <- before$y
   if (is.null(x) || is.null(out)) return(invisible(NULL))
   added <- setdiff(names(out), x$names)
-  type <- join_type(cl, pf)
+  type <- join_type(before)
   first <- if (length(added)) {
     sprintf("added %s (%s)", plural(length(added), "column"), format_list(added))
   } else {
     "added no columns"
   }
-  stats <- if (detail_full()) try_log(join_stats(x, y, cl, pf)) else NULL
+  stats <- if (detail_full()) try_log(join_stats(x, y, before)) else NULL
   written <- before$.call %||% cl
   rest <- if (is.null(stats)) {
     list(row_change(x$nrow, nrow(out)))
@@ -44,11 +45,14 @@ log_merge <- function(out, before, cl, pf) {
   display_block(paste0(type, ": "), c(list(first), rest))
 }
 
-join_type <- function(cl, pf) {
+# The flags were resolved before the call, so nothing here evaluates an
+# argument a second time. `all.x` and `all.y` fall back to `all`, exactly as
+# merge.data.table's own defaults do.
+join_type <- function(before) {
   get_flag <- function(name) {
-    expr <- matched_arg(cl, "merge.data.table", name)
-    if (is.null(expr)) return(NULL)
-    isTRUE(tryCatch(eval(expr, pf), error = function(e) FALSE))
+    arg <- element(before, name)
+    if (is.null(arg)) return(NULL)
+    isTRUE(arg$obj)
   }
   all <- get_flag("all")
   all_x <- get_flag("all.x") %||% all %||% FALSE
@@ -59,11 +63,9 @@ join_type <- function(cl, pf) {
 }
 
 # the columns the two tables are matched on
-merge_by <- function(x, y, cl, pf) {
+merge_by <- function(x, y, before) {
   value <- function(name) {
-    expr <- matched_arg(cl, "merge.data.table", name)
-    if (is.null(expr)) return(NULL)
-    v <- tryCatch(eval(expr, pf), error = function(e) NULL)
+    v <- element(before, name)$obj
     if (is.character(v)) v else NULL
   }
   by <- value("by")
@@ -91,9 +93,9 @@ default_merge_by <- function(x, y) {
   intersect(x$names, y$names)
 }
 
-join_stats <- function(x, y, cl, pf) {
+join_stats <- function(x, y, before) {
   if (is.null(y) || is.null(x$obj) || is.null(y$obj)) return(NULL)
-  by <- merge_by(x, y, cl, pf)
+  by <- merge_by(x, y, before)
   if (is.null(by)) return(NULL)
   bracket <- .dt$bracket
   # for every row of x the first matching row of y, and the other way round

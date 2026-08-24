@@ -15,11 +15,9 @@ use the \code{conflicted} package.
 \details{
 The operations themselves are never changed: \code{dtlog} only adds a message.
 Modification by reference (\verb{:=}, \verb{set*()}), keys, indices, return values and
-visibility all behave exactly as they do in \code{data.table}. The one thing that
-is not identical is that \verb{with=} and \verb{which=} are evaluated twice, once by
-\code{dtlog} to classify the call and once by \code{data.table}; this is only
-noticeable if such an argument is written as an expression with a side
-effect.
+visibility all behave exactly as they do in \code{data.table}, and every argument
+is evaluated exactly as often as \code{data.table} evaluates it, so an argument
+written as an expression with a side effect still runs only once.
 }
 \section{Options}{
 

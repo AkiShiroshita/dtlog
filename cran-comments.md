@@ -4,6 +4,13 @@ This is the first submission of 'dtlog' (version 0.1.0).
 
 ## Test environments
 
+<!-- ============================================================ -->
+<!-- STALE: every run recorded below was made before the argument -->
+<!-- evaluation fix. Re-run win-builder (devel + release), R-hub  -->
+<!-- v2 and GitHub Actions on the current code, replace the dates -->
+<!-- and results here, and delete this comment before submitting. -->
+<!-- ============================================================ -->
+
 * win-builder, R release 4.6.1 (2026-06-24 ucrt), Windows Server 2022 x64
   (build 20348), x86_64-w64-mingw32 -- Status: 1 NOTE (2026-08-23).
 
@@ -51,7 +58,7 @@ are function names, so they are not quoted.
 
 `R CMD check` reports OK for every other check on every platform above,
 including the examples, the vignette, the PDF and HTML versions of the manual,
-and the test suite (testthat edition 3, 818 expectations across 10 files, none
+and the test suite (testthat edition 3, 906 expectations across 10 files, none
 failing).
 
 ## Notes for the reviewer
@@ -64,7 +71,13 @@ the 'data.table' implementation. Attaching the package therefore masks those
 help and README. The underlying behaviour, including modification by reference,
 is unchanged; `tests/testthat/test-parity.R` and
 `tests/testthat/test-no-side-effects.R` verify that results are identical to
-plain 'data.table'. This mirrors the approach taken by the 'tidylog' package,
+plain 'data.table'. The latter also verifies that every argument a wrapper has
+to read in order to describe the call -- `which=`, `with=`, the computed left
+hand side of a `(cols) :=`, `merge()`'s `by=` and `all*=`, `na.omit()`'s
+`invert=`, `set()`'s `j=`, `setorderv()`'s `cols=` and `setattr()`'s `name=` --
+is evaluated exactly once, as often as 'data.table' evaluates it, so an
+argument written as an expression with a side effect behaves the same with and
+without 'dtlog'. This mirrors the approach taken by the 'tidylog' package,
 which is already on CRAN.
 
 The package also provides `dttable()`, which describes a single 'data.table'

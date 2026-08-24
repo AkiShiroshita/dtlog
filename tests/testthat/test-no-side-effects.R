@@ -186,6 +186,51 @@ test_that("fread() and fwrite() evaluate their arguments only once", {
   expect_evaluated_once(quote(fwrite(tick(OTHER), TMPFILE)))
 })
 
+test_that("the arguments dtlog reads for its message are evaluated only once", {
+  # every one of these is an argument that data.table evaluates itself and that
+  # dtlog also needs the value of, to say what the call did
+  expect_evaluated_once(quote(DT[mpg > 20, which = tick(TRUE)]))
+  expect_evaluated_once(quote(DT[, "mpg", with = tick(TRUE)]))
+  expect_evaluated_once(quote(DT[, (tick(cols)) := 0]))
+  expect_evaluated_once(quote(merge(DT, OTHER, by = tick("cyl"))))
+  expect_evaluated_once(quote(merge(DT, OTHER, by.x = tick("cyl"), by.y = "cyl")))
+  expect_evaluated_once(quote(merge(DT, OTHER, by = "cyl", all = tick(TRUE))))
+  expect_evaluated_once(quote(merge(DT, OTHER, by = "cyl", all.x = tick(TRUE))))
+  expect_evaluated_once(quote(merge(DT, OTHER, by = "cyl", all.y = tick(TRUE))))
+  expect_evaluated_once(quote(stats::na.omit(WITH_NA, invert = tick(FALSE))))
+  expect_evaluated_once(quote(data.table::setattr(DT, tick("note"), 1L)))
+  expect_evaluated_once(quote(data.table::setattr(DT, name = tick("note"), 1L)))
+  expect_evaluated_once(quote(data.table::set(DT, j = tick("mpg"), value = 0)))
+  expect_evaluated_once(quote(data.table::set(DT, NULL, tick("mpg"), 0)))
+  expect_evaluated_once(quote(data.table::setorderv(DT, tick("mpg"))))
+  expect_evaluated_once(quote(data.table::setorderv(DT, cols = tick("mpg"))))
+  expect_evaluated_once(quote(
+    data.table::melt(WIDE, id.vars = "id", measure.vars = tick("p"))
+  ))
+})
+
+test_that("an argument resolved before the call still reaches data.table", {
+  # the value replaces the expression in the call dtlog re-evaluates, so the
+  # operation has to come out exactly as it does without dtlog
+  expect_parity(quote(DT[mpg > 20, which = identity(TRUE)]))
+  expect_parity(quote(DT[, c("mpg", "cyl"), with = identity(TRUE)]))
+  expect_parity(quote(DT[, (c("a", "b")) := list(1, 2)]))
+  expect_parity(quote(DT[, (cols) := 0]))
+  expect_parity(quote(merge(DT, OTHER, by = paste0("c", "yl"))))
+  expect_parity(quote(merge(DT, OTHER, by = "cyl", all.x = identity(TRUE))))
+  expect_parity(quote(stats::na.omit(WITH_NA, invert = identity(TRUE))))
+  expect_parity(quote(data.table::melt(WIDE, id.vars = "id",
+                                       measure.vars = paste0("p"))))
+})
+
+test_that("a computed `(cols) :=` still names its columns from the log", {
+  env <- fresh_env()
+  messages <- loud(eval(quote(DT[, (rev(cols)) := 0]), env))
+  expect_match(messages, "wt", all = FALSE)
+  expect_match(messages, "hp", all = FALSE)
+  expect_identical(env$DT$hp, rep(0, nrow(env$DT)))
+})
+
 test_that("rbindlist() builds its list of tables only once", {
   # rbindlist(lapply(files, read_rds)) is the usual way to read a directory;
   # reading every file a second time to write the log would be expensive as

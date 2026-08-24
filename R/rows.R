@@ -49,13 +49,13 @@ log_duplicated <- function(out, before, cl, pf) {
 #' @export
 na.omit.data.table <- function(object, ...) {
   logged("na.omit.data.table", sys.call(), parent.frame(), log_na_omit,
-         if (missing(object)) NULL else list(object = object))
+         if (missing(object)) NULL else list(object = object),
+         args = "invert", match = TRUE)
 }
 
 log_na_omit <- function(out, before, cl, pf) {
   if (is.null(before$object) || !is.data.frame(out)) return(invisible(NULL))
-  invert <- isTRUE(tryCatch(eval(matched_arg(cl, "na.omit.data.table", "invert"), pf),
-                            error = function(e) FALSE))
+  invert <- isTRUE(element(before, "invert")$obj)
   if (invert) {
     return(display(sprintf(
       "na.omit (invert): kept the %s with NA (%s)",

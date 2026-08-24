@@ -11,6 +11,11 @@
   `dcast()`, `as.data.table()`, `fread()`, `fwrite()`, the `set*()` family and
   the set operations `funion()`, `fintersect()` and `fsetdiff()`.
 
+* The operations are left untouched. Results, visibility, modification by
+  reference, keys and indices are those of `data.table`, and every argument is
+  evaluated exactly as often as `data.table` evaluates it: `dtlog` never
+  computes an argument a second time in order to describe what a call did.
+
 * `dttable()` describes the variables of a single data table -- one row per
   column, with the number of unique values and the values themselves -- and
   passes every other call on to `base::table()` unchanged. It is a function of

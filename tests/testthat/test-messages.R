@@ -207,6 +207,18 @@ test_that("the other wrapped functions report what they did", {
     quote(melt(WIDE, id.vars = "id", measure.vars = 2L)),
     "melt: reorganized \\(p\\) into \\(variable, value\\) \\[was 2x3, now 2x3\\], dropped one variable \\(q\\)"
   )
+  # patterns() never evaluates outside melt(), so the stacked columns are read
+  # off the result rather than off the argument
+  expect_dtlog_message(
+    quote(melt(WIDE, id.vars = "id", measure.vars = data.table::patterns("^p"))),
+    "melt: reorganized \\(p\\) into \\(variable, value\\) \\[was 2x3, now 2x3\\], dropped one variable \\(q\\)"
+  )
+  # a multi-value melt numbers its groups instead of naming them, and then
+  # nothing is reported as dropped rather than the wrong thing
+  expect_dtlog_message(
+    quote(melt(WIDE, id.vars = "id", measure.vars = list("p", "q"))),
+    "melt: reorganized \\(p, q\\) into \\(variable, value1, value2\\)"
+  )
   expect_dtlog_message(quote(dcast(LONG, id ~ variable)),
                        "dcast: reorganized \\(variable, value\\) into \\(p, q\\)")
   expect_dtlog_message(quote(head(DT, 5)),

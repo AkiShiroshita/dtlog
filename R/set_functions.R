@@ -110,11 +110,12 @@ setorderv <- function(x, ...) {
 order_logged <- function(name, cl, pf, arg) {
   if (!should_log_call(pf)) return(run_wrapped(name, cl, pf))
   written_call <- cl
-  resolved <- try_log(resolve_arg(cl, name, "x", pf))
-  if (!is.list(resolved)) resolved <- no_arg(cl)
-  target <- resolved$value
+  wanted <- if (identical(arg, "...")) "x" else c("x", arg)
+  resolved <- try_log(resolve_all(cl, dt_formals(name), wanted, pf))
+  if (!is.list(resolved)) resolved <- nothing_resolved(cl, wanted)
+  target <- resolved$values[["x"]]
   cl <- resolved$cl
-  by <- try_log(order_columns(cl, name, arg, pf))
+  by <- try_log(order_columns(cl, arg, resolved$values))
   before <- list(x = try_log(snap(target)), by = by,
                  cols = try_log(order_snapshot(target, by)))
   before$.call <- written_call
@@ -148,7 +149,10 @@ order_unchanged <- function(cols, obj) {
              function(nm) identical(cols[[nm]], obj[[nm]]), logical(1L)))
 }
 
-order_columns <- function(cl, fun, arg, pf) {
+# setorder(DT, a, -b) names its columns as expressions that neither dtlog nor
+# data.table evaluates, so they are read straight off the call. setorderv()
+# takes them as a value, which resolve_all() has already evaluated once.
+order_columns <- function(cl, arg, values) {
   if (identical(arg, "...")) {
     args <- as.list(cl)[-1L]
     nms <- names(args)
@@ -156,8 +160,7 @@ order_columns <- function(cl, fun, arg, pf) {
     if (length(args)) args <- args[-1L]  # drop x
     return(vapply(args, deparse_short, character(1L)))
   }
-  expr <- matched_arg(cl, fun, arg)
-  value <- tryCatch(eval(expr, pf), error = function(e) NULL)
+  value <- element(values, arg)
   if (is.character(value)) value else character()
 }
 
@@ -201,22 +204,22 @@ set <- function(x, ...) {
   pf <- parent.frame()
   if (!should_log_call(pf)) return(run_wrapped("set", cl, pf))
   written_call <- cl
-  resolved <- try_log(resolve_arg(cl, "set", "x", pf))
-  if (!is.list(resolved)) resolved <- no_arg(cl)
-  target <- resolved$value
+  resolved <- try_log(resolve_all(cl, dt_formals("set"), c("x", "j"), pf))
+  if (!is.list(resolved)) resolved <- nothing_resolved(cl, c("x", "j"))
+  target <- resolved$values[["x"]]
   cl <- resolved$cl
-  before <- try_log(list(x = snap(target), cols = set_columns(cl, pf, target)))
+  before <- try_log(list(x = snap(target),
+                         cols = set_columns(resolved$values[["j"]], target)))
   if (is.list(before)) before$.call <- written_call
   run_wrapped("set", cl, pf, before, log_set, bindings = resolved$bindings)
 }
 
-# the columns a set() call writes to, and a copy of their current values
-set_columns <- function(cl, pf, target) {
+# the columns a set() call writes to, and a copy of their current values. `j`
+# is the value resolve_all() read off the call, evaluated once.
+set_columns <- function(j, target) {
   if (is.null(target)) return(NULL)
-  expr <- matched_arg(cl, "set", "j")
-  value <- tryCatch(eval(expr, pf), error = function(e) NULL)
-  cols <- if (is.character(value)) value else
-    if (is.numeric(value)) names(target)[value] else NULL
+  cols <- if (is.character(j)) j else
+    if (is.numeric(j)) names(target)[j] else NULL
   cols <- intersect(cols, names(target))
   if (!length(cols) || !detail_full()) return(NULL)
   stats::setNames(lapply(cols, function(nm) data.table::copy(target[[nm]])), cols)
@@ -282,11 +285,11 @@ setattr <- function(x, ...) {
 attr_logged <- function(cl, pf) {
   if (!should_log_call(pf)) return(run_wrapped("setattr", cl, pf))
   written_call <- cl
-  resolved <- try_log(resolve_arg(cl, "setattr", "x", pf))
-  if (!is.list(resolved)) resolved <- no_arg(cl)
-  target <- resolved$value
+  resolved <- try_log(resolve_all(cl, dt_formals("setattr"), c("x", "name"), pf))
+  if (!is.list(resolved)) resolved <- nothing_resolved(cl, c("x", "name"))
+  target <- resolved$values[["x"]]
   cl <- resolved$cl
-  name <- try_log(eval(matched_arg(cl, "setattr", "name"), pf))
+  name <- resolved$values[["name"]]
   before <- list(x = try_log(snap(target)))
   before$name <- if (is.character(name) && length(name) == 1L) name else NULL
   # The attribute has to be copied, not just referenced: setattr() writes by

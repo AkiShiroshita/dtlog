@@ -45,7 +45,7 @@ run_wrapped <- function(name, cl, pf, before = NULL, log_fn = NULL,
 # when dtlog re-evaluates the call. That is safe for every function except the
 # set*() family, which uses substitute() on its first argument to write back
 # into the caller; for those, pass `args` instead, and dtlog resolves those
-# arguments with resolve_arg() -- leaving the expression alone when data.table
+# arguments with resolve_all() -- leaving the expression alone when data.table
 # needs to see it, and evaluating it exactly once otherwise.
 #
 # `values` and `args` can be combined: fwrite() forces `x` itself and lets
@@ -81,12 +81,12 @@ logged <- function(name, cl, pf, log_fn = NULL, values = NULL, args = NULL,
     snapped <- try_log(lapply(values, snap))
     if (is.list(snapped)) before <- snapped
   }
-  for (a in args) {
-    resolved <- try_log(resolve_arg(cl, name, a, pf))
-    if (!is.list(resolved)) resolved <- no_arg(cl)
+  if (length(args)) {
+    resolved <- try_log(resolve_all(cl, dt_formals(name), args, pf))
+    if (!is.list(resolved)) resolved <- nothing_resolved(cl, args)
     cl <- resolved$cl
     bindings[names(resolved$bindings)] <- resolved$bindings
-    before[a] <- list(try_log(snap(resolved$value)))
+    for (a in args) before[a] <- list(try_log(snap(resolved$values[[a]])))
   }
   before$.call <- written_call
   run_wrapped(name, cl, pf, before, log_fn, bindings = bindings)
@@ -96,7 +96,42 @@ stopf_missing_call <- function(name) {
   stop(sprintf("dtlog could not reconstruct the call to %s()", name), call. = FALSE)
 }
 
-# Get hold of the value of one argument of the call before the call runs,
+# Resolve several arguments of one call, each of them evaluated at most once.
+# Returns the (possibly rewritten) call, the values by argument name, and the
+# placeholder bindings the rewritten call needs.
+#
+# The positions are worked out once for the whole call, so an argument is found
+# wherever data.table would find it -- named, named in part, or positional --
+# without the call itself having to be rearranged.
+resolve_all <- function(cl, fun, args, pf, pos = NULL) {
+  if (is.null(pos)) pos <- if (is.null(fun)) integer() else arg_positions(cl, fun)
+  values <- list()
+  bindings <- list()
+  for (arg in args) {
+    k <- position_of(pos, arg)
+    if (is.na(k)) k <- arg_index(cl, arg)
+    # by far the most common case is an argument the call does not have, and it
+    # is not worth a tryCatch to find that out
+    if (is.na(k)) {
+      values[arg] <- list(NULL)
+      next
+    }
+    resolved <- try_log(resolve_at(cl, k, pf))
+    if (!is.list(resolved)) resolved <- no_arg(cl)
+    cl <- resolved$cl
+    bindings[names(resolved$bindings)] <- resolved$bindings
+    values[arg] <- list(resolved$value)
+  }
+  list(cl = cl, values = values, bindings = bindings, positions = pos)
+}
+
+# what resolve_all() would have returned had it not failed
+nothing_resolved <- function(cl, args) {
+  list(cl = cl, values = stats::setNames(vector("list", length(args)), args),
+       bindings = list(), positions = integer())
+}
+
+# Get hold of the value of the argument at position `k` before the call runs,
 # without ever computing it twice. Returns the (possibly rewritten) call, the
 # value, and any placeholder binding the rewritten call needs.
 #
@@ -110,11 +145,11 @@ stopf_missing_call <- function(name) {
 # of a pipe) is evaluated once here and bound to a placeholder that replaces it
 # in the call, so that re-evaluating the call does not compute it a second
 # time. `[.data.table` does exactly the same thing; see bracket_env().
-resolve_arg <- function(cl, name, arg, pf) {
-  k <- arg_index(cl, arg)
-  if (is.na(k)) return(no_arg(cl))
+resolve_at <- function(cl, k, pf) {
+  # an empty slot has to be recognised before it is bound to a variable: R
+  # calls reading such a variable a missing argument, and stops
+  if (is.na(k) || is_missing_arg(cl[[k]])) return(no_arg(cl))
   expr <- cl[[k]]
-  if (is_missing_arg(expr)) return(no_arg(cl))
   got <- tryCatch(list(ok = TRUE, value = eval(expr, pf)),
                   error = function(e) list(ok = FALSE, value = NULL))
   if (!got$ok) return(no_arg(cl))
@@ -124,7 +159,7 @@ resolve_arg <- function(cl, name, arg, pf) {
   if (is_reference_target(expr) || is_constant(expr)) {
     return(list(cl = cl, value = got$value, bindings = list()))
   }
-  placeholder <- paste0(".dtlog_", arg)
+  placeholder <- sprintf(".dtlog_arg%d", k)
   cl[[k]] <- as.name(placeholder)
   list(cl = cl, value = got$value,
        bindings = stats::setNames(list(got$value), placeholder))
@@ -134,13 +169,52 @@ no_arg <- function(cl) list(cl = cl, value = NULL, bindings = list())
 
 is_constant <- function(expr) !is.name(expr) && !is.call(expr) && !is.expression(expr)
 
-# Position of `arg` in the call as written. Only a formal that comes first can
-# be matched positionally, which is what `x` is for every function dtlog wraps
-# with args = "x" (several of them, such as setindex(), are declared as
-# function(...), so match.call() is no help here). Any other argument -- fread()
-# resolves `input` and `file`, fwrite() `file` and `append` -- can only be found
-# by name, so those wrappers have to pass match = TRUE, which names the
-# positional arguments before resolve_arg() looks for them.
+# Where each formal of `fun` ended up in the call as written. Every argument is
+# replaced by a marker before match.call() runs, so what comes back is a set of
+# positions in `cl` rather than a rearranged call: the call keeps the shape
+# data.table expects, and an argument given positionally or under a partial
+# name is still found. Functions declared as function(...) -- setindex() is one
+# -- have nothing to match against and give an empty answer; arg_index() then
+# falls back to looking for the argument by name.
+arg_positions <- function(cl, fun) {
+  n <- length(cl)
+  if (n < 2L) return(integer())
+  if (is.null(names(cl))) {
+    # nothing is named, so the arguments line up with the formals in order and
+    # there is nothing for match.call() to work out. Everything from the first
+    # `...` on is swallowed by it -- setorder(x, ..., na.last) never matches a
+    # positional argument to na.last -- so the answer stops there.
+    formal_names <- names(formals(fun))
+    dots <- match("...", formal_names, nomatch = 0L)
+    if (dots > 0L) formal_names <- formal_names[seq_len(dots - 1L)]
+    last <- min(n - 1L, length(formal_names))
+    if (last < 1L) return(integer())
+    return(stats::setNames(seq.int(2L, last + 1L), formal_names[seq_len(last)]))
+  }
+  markers <- paste0(".dtlog_at", seq.int(2L, n))
+  probe <- cl
+  for (k in seq.int(2L, n)) probe[[k]] <- as.name(markers[k - 1L])
+  m <- tryCatch(match.call(fun, probe, expand.dots = TRUE),
+                error = function(e) NULL)
+  if (is.null(m) || length(m) < 2L) return(integer())
+  parts <- as.list(m)[-1L]
+  nms <- names(parts)
+  if (is.null(nms)) return(integer())
+  at <- match(vapply(parts, symbol_text, character(1L)), markers)
+  keep <- !is.na(at) & nzchar(nms)
+  stats::setNames(at[keep] + 1L, nms[keep])
+}
+
+# the name of a symbol, and "" for anything else
+symbol_text <- function(x) if (is.name(x)) as.character(x) else ""
+
+position_of <- function(pos, arg) {
+  if (arg %in% names(pos)) unname(pos[[arg]]) else NA_integer_
+}
+
+# Position of `arg` in the call as written, for the calls that arg_positions()
+# cannot match: `x` is the first formal of every function dtlog wraps with
+# args = "x", so an unnamed first argument is it.
 arg_index <- function(cl, arg) {
   if (length(cl) < 2L) return(NA_integer_)
   nms <- names(cl)
@@ -152,6 +226,10 @@ arg_index <- function(cl, arg) {
   unnamed <- unnamed[unnamed > 1L]
   if (length(unnamed)) unnamed[1L] else NA_integer_
 }
+
+# data.table's version of a wrapped function, or NULL when it cannot be found.
+# Only its formals are wanted, to work out which argument is where.
+dt_formals <- function(name) tryCatch(original(name), error = function(e) NULL)
 
 matched_arg <- function(cl, name, arg) {
   m <- tryCatch(match.call(original(name), cl), error = function(e) NULL)

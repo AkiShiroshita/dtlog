@@ -48,7 +48,7 @@ dcast.data.table <- function(data, ...) {
 }
 
 log_melt <- function(out, before, cl, pf) {
-  log_reshape("melt", out, before$data, melted_columns(cl, pf, before$data))
+  log_reshape("melt", out, before$data, melted_columns(out, before$data))
 }
 
 log_dcast <- function(out, before, cl, pf) {
@@ -56,22 +56,28 @@ log_dcast <- function(out, before, cl, pf) {
 }
 
 # The columns melt() actually stacked -- everything else that disappeared was
-# simply dropped. measure.vars is given either as names or as column numbers,
-# so the value has to be resolved against the names of the input. A selection
-# that cannot be resolved gives NULL, and then nothing is reported as dropped
-# rather than the wrong columns being reported: that covers the list form of a
-# multi-value melt, and patterns(), which does not even evaluate outside melt().
-melted_columns <- function(cl, pf, before) {
-  if (is.null(before)) return(NULL)
-  expr <- matched_arg(cl, "melt.data.table", "measure.vars")
-  if (is.null(expr)) return(NULL)
-  value <- tryCatch(eval(expr, pf), error = function(e) NULL)
-  nms <- before$names
-  if (is.character(value)) return(intersect(value, nms))
-  if (is.numeric(value) && length(value) && !anyNA(value) && all(value > 0)) {
-    return(nms[value[value <= length(nms)]])
-  }
-  NULL
+# simply dropped. They are read off the result rather than off measure.vars:
+# melt() runs substitute() on that argument and resolves it against the column
+# names itself, so evaluating it here would both run it a second time and risk
+# resolving it against the caller's variables instead. The variable column of
+# the result names the stacked columns and nothing else, whatever form
+# measure.vars took -- names, numbers or patterns().
+#
+# melt() writes the variable column before the value columns, so it is the
+# first column of the result that was not in the input, and it counts only if
+# every one of its values is the name of a column that disappeared. Otherwise
+# the answer is NULL and nothing is reported as dropped, rather than the wrong
+# columns being reported: that is what happens for the list form of a
+# multi-value melt, whose variable column holds group numbers, not names.
+melted_columns <- function(out, before) {
+  if (is.null(before) || !is.data.frame(out)) return(NULL)
+  gone <- setdiff(before$names, names(out))
+  new <- setdiff(names(out), before$names)
+  if (!length(gone) || !length(new)) return(NULL)
+  column <- out[[new[1L]]]
+  seen <- if (is.factor(column)) levels(column) else
+    if (is.character(column)) unique(column) else NULL
+  if (length(seen) && all(seen %in% gone)) seen else NULL
 }
 
 log_reshape <- function(fun, out, before, melted = NULL) {
