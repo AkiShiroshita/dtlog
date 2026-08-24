@@ -4,19 +4,12 @@ This is the first submission of 'dtlog' (version 0.1.0).
 
 ## Test environments
 
-<!-- ================================================================== -->
-<!-- The two win-builder lines below are the only ones not yet filled  -->
-<!-- in for this version: both runs were submitted on 2026-08-24 and   -->
-<!-- their results arrive by email. Replace the two <PENDING> markers  -->
-<!-- with the reported status, and delete this comment, before         -->
-<!-- submitting. Every other run below was made on the current code.   -->
-<!-- ================================================================== -->
+* win-builder, R release 4.6.1 (2026-06-24 ucrt), Windows Server 2022 x64
+  (build 20348), x86_64-w64-mingw32 -- Status: 1 NOTE (2026-08-24).
 
-* win-builder, R release, Windows Server 2022 x64, x86_64-w64-mingw32 --
-  submitted 2026-08-24, Status: <PENDING>.
-
-* win-builder, R Under development (unstable), Windows Server 2022 x64,
-  x86_64-w64-mingw32 -- submitted 2026-08-24, Status: <PENDING>.
+* win-builder, R Under development (unstable) (2026-08-22 r90443 ucrt),
+  Windows Server 2022 x64 (build 20348), x86_64-w64-mingw32 -- Status: 1 NOTE
+  (2026-08-24).
 
 * GitHub Actions, `R CMD check --as-cran` (2026-08-24) -- Status: OK on each
   of:
@@ -44,7 +37,8 @@ This is the first submission of 'dtlog' (version 0.1.0).
 ## R CMD check results
 
 Every GitHub Actions and R-hub platform above reports Status: OK -- 0 errors,
-0 warnings, 0 notes. The local run reports 0 errors | 0 warnings | 1 note.
+0 warnings, 0 notes. Both win-builder runs (R-release and R-devel) and the
+local run report 0 errors | 0 warnings | 1 note.
 
 The note is the expected one for a package not yet on CRAN:
 
