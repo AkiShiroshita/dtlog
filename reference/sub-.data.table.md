@@ -1,9 +1,9 @@
 # Subset, aggregate and update a data.table, with a log
 
-\`dtlog\` redefines the \`\[\` method for data tables. The call is
-passed on to \`data.table\` unchanged – same arguments, same evaluation
-environment, same return value, same modification by reference – and a
-message describing what happened is printed afterwards.
+`dtlog` redefines the `[` method for data tables. The call is passed on
+to `data.table` unchanged – same arguments, same evaluation environment,
+same return value, same modification by reference – and a message
+describing what happened is printed afterwards.
 
 ## Usage
 
@@ -16,27 +16,25 @@ x[...]
 
 - x:
 
-  A \`data.table\`.
+  A `data.table`.
 
 - ...:
 
-  All other arguments of \`\[.data.table\`, i.e. \`i\`, \`j\`, \`by\`,
-  \`keyby\`, \`with\`, \`nomatch\`, \`mult\`, \`roll\`, \`rollends\`,
-  \`which\`, \`.SDcols\`, \`verbose\`, \`allow.cartesian\`, \`drop\`,
-  \`on\`, \`env\` and \`showProgress\`. They are never touched by
-  \`dtlog\`.
+  All other arguments of `[.data.table`, i.e. `i`, `j`, `by`, `keyby`,
+  `with`, `nomatch`, `mult`, `roll`, `rollends`, `which`, `.SDcols`,
+  `verbose`, `allow.cartesian`, `drop`, `on`, `env` and `showProgress`.
+  They are never touched by `dtlog`.
 
 ## Value
 
-Whatever \`data.table\`'s \`\[\` returns, with the same visibility.
+Whatever `data.table`'s `[` returns, with the same visibility.
 
 ## Details
 
-Depending on the call, the message uses the vocabulary of \`tidylog\`:
-\`filter\` (rows removed by \`i\`), \`arrange\` (rows reordered),
-\`join\` (\`i\` is a table or \`on=\` was given), \`select\` (\`j\` only
-picks existing columns), \`mutate\` (\`:=\`), \`group_by\`/\`summarize\`
-(\`by=\`/\`keyby=\`).
+Depending on the call, the message uses the vocabulary of `tidylog`:
+`filter` (rows removed by `i`), `arrange` (rows reordered), `join` (`i`
+is a table or `on=` was given), `select` (`j` only picks existing
+columns), `mutate` (`:=`), `group_by`/`summarize` (`by=`/`keyby=`).
 
 ## Examples
 

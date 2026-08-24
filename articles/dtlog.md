@@ -73,9 +73,9 @@ end of things.
 
 path <- tempfile(fileext = ".csv")
 fwrite(patients, path)
-#> fwrite: wrote 19 rows and 4 columns to 'file1b034cf2bde2.csv'
+#> fwrite: wrote 19 rows and 4 columns to 'file1b40740a9229.csv'
 patients <- fread(path)
-#> fread: read 19 rows and 4 columns from 'file1b034cf2bde2.csv'
+#> fread: read 19 rows and 4 columns from 'file1b40740a9229.csv'
 ```
 
 [`fread()`](https://akishiroshita.github.io/dtlog/reference/fread.md)
@@ -255,7 +255,7 @@ summary_tbl <- final[, .(n = .N, mean_crp_log = mean(crp_log)), by = .(arm, sex)
 #> summarize: now 4 rows and 4 columns (was 46 rows and 9 columns)
 
 dt_log_end()
-#> dt_log: wrote 3 operations to '/tmp/RtmpSVz41t/file1b0334bc1bb3.txt'
+#> dt_log: wrote 3 operations to '/tmp/Rtmplo9uto/file1b401ab528a2.txt'
 ```
 
 The file holds the calls as R deparses them, with their messages
@@ -263,7 +263,7 @@ underneath:
 
 ``` r
 cat(readLines(log_path), sep = "\n")
-# dtlog transcript, started 2026-08-23 05:27:08
+# dtlog transcript, started 2026-08-24 02:23:27
 # R version 4.6.1 (2026-06-24), data.table 1.18.4, dtlog 0.1.0
 > merged[!is.na(crp)]
 filter: removed 5 rows (10%), 46 rows remaining
@@ -275,7 +275,7 @@ mutate: new variable 'crp_log' (double) with 40 unique values and 0% NA
 group_by: 2 grouping variables (arm, sex)
 summarize: now 4 rows and 4 columns (was 46 rows and 9 columns)
 
-# dtlog transcript, ended 2026-08-23 05:27:08 (3 operations)
+# dtlog transcript, ended 2026-08-24 02:23:27 (3 operations)
 ```
 
 `dt_log(append = TRUE)` adds to an existing file, `code = FALSE` writes

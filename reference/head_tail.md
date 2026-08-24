@@ -20,12 +20,13 @@ tail(x, ...)
 
 - ...:
 
-  All other arguments of \[utils::head()\] and \[utils::tail()\], i.e.
-  \`n\`.
+  All other arguments of
+  [`utils::head()`](https://rdrr.io/r/utils/head.html) and
+  [`utils::tail()`](https://rdrr.io/r/utils/head.html), i.e. `n`.
 
 ## Value
 
-The same rows \`data.table\` would return.
+The same rows `data.table` would return.
 
 ## Examples
 

@@ -1,10 +1,9 @@
 # Write the code and its log to a text file
 
-\`dt_log()\` starts a transcript: from that point on, every operation
-that dtlog reports is appended to a text file, together with the call
-that produced it. \`dt_log_end()\` closes the transcript. Start and end
-are up to you; nothing is written before the first call or after the
-second.
+`dt_log()` starts a transcript: from that point on, every operation that
+dtlog reports is appended to a text file, together with the call that
+produced it. `dt_log_end()` closes the transcript. Start and end are up
+to you; nothing is written before the first call or after the second.
 
 ## Usage
 
@@ -20,8 +19,8 @@ dt_log_file()
 
 - file:
 
-  Path of the text file. \`NULL\` ends the current transcript, so
-  \`dt_log(NULL)\` is the same as \`dt_log_end()\`.
+  Path of the text file. `NULL` ends the current transcript, so
+  `dt_log(NULL)` is the same as `dt_log_end()`.
 
 - append:
 
@@ -29,12 +28,11 @@ dt_log_file()
 
 - code:
 
-  Write the call above its log. Set to \`FALSE\` for the messages alone.
+  Write the call above its log. Set to `FALSE` for the messages alone.
 
 - echo:
 
-  Keep printing to the console as well. \`FALSE\` writes only to the
-  file.
+  Keep printing to the console as well. `FALSE` writes only to the file.
 
 ## Value
 
@@ -42,9 +40,10 @@ The path of the transcript, invisibly.
 
 ## Details
 
-Each operation is appended with a plain \[cat()\] that opens and closes
-the file again, so the transcript stays readable while a long script is
-running and survives a session that ends without \`dt_log_end()\` (only
+Each operation is appended with a plain
+[`cat()`](https://rdrr.io/r/base/cat.html) that opens and closes the
+file again, so the transcript stays readable while a long script is
+running and survives a session that ends without `dt_log_end()` (only
 the closing line is then missing).
 
 ## Examples
@@ -108,9 +107,9 @@ dt[, kpl := mpg * 0.425]
 #>       mpg   cyl  disp    hp  drat    wt  qsec    vs    am  gear  carb     kpl
 #>     <num> <num> <num> <num> <num> <num> <num> <num> <num> <num> <num>   <num>
 dt_log_end()
-#> dt_log: wrote 2 operations to '/tmp/RtmppEjhyf/file197974e40bab.txt'
+#> dt_log: wrote 2 operations to '/tmp/Rtmpkw3Cq8/file19b530ea9794.txt'
 cat(readLines(path), sep = "\n")
-#> # dtlog transcript, started 2026-08-23 05:27:04
+#> # dtlog transcript, started 2026-08-24 02:23:23
 #> # R version 4.6.1 (2026-06-24), data.table 1.18.4, dtlog 0.1.0
 #> > dt[mpg > 20]
 #> filter: removed 18 rows (56%), 14 rows remaining
@@ -118,5 +117,5 @@ cat(readLines(path), sep = "\n")
 #> > dt[, `:=`(kpl, mpg * 0.425)]
 #> mutate: new variable 'kpl' (double) with 25 unique values and 0% NA
 #> 
-#> # dtlog transcript, ended 2026-08-23 05:27:04 (2 operations)
+#> # dtlog transcript, ended 2026-08-24 02:23:23 (2 operations)
 ```

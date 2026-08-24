@@ -1,8 +1,8 @@
 # Merge two data tables, with a log
 
 Reports the columns the merge added and how the rows of the two inputs
-were matched, in the style of \`tidylog\`'s join messages. The counts of
-unmatched rows are only computed when \`options(dtlog.detail = "full")\`
+were matched, in the style of `tidylog`'s join messages. The counts of
+unmatched rows are only computed when `options(dtlog.detail = "full")`
 (the default); they cost two additional matching passes over the inputs.
 
 ## Usage
@@ -20,11 +20,13 @@ merge(x, y, ...)
 
 - ...:
 
-  All other arguments of \[data.table::merge.data.table()\].
+  All other arguments of
+  [`data.table::merge.data.table()`](https://rdrr.io/pkg/data.table/man/merge.html).
 
 ## Value
 
-The merged data table, exactly as \[data.table::merge.data.table()\]
+The merged data table, exactly as
+[`data.table::merge.data.table()`](https://rdrr.io/pkg/data.table/man/merge.html)
 returns it.
 
 ## Examples

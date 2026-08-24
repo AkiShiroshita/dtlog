@@ -1,8 +1,8 @@
 # Reshape a data table, with a log
 
 Reports which columns were reorganized into which, and how the
-dimensions of the table changed, in the style of \`tidylog\`'s
-\`pivot_longer()\` and \`pivot_wider()\` messages.
+dimensions of the table changed, in the style of `tidylog`'s
+`pivot_longer()` and `pivot_wider()` messages.
 
 ## Usage
 
@@ -26,8 +26,10 @@ dcast(data, ...)
 
 - ...:
 
-  All other arguments of \[data.table::melt.data.table()\] and
-  \[data.table::dcast.data.table()\].
+  All other arguments of
+  [`data.table::melt.data.table()`](https://rdrr.io/pkg/data.table/man/melt.data.table.html)
+  and
+  [`data.table::dcast.data.table()`](https://rdrr.io/pkg/data.table/man/dcast.data.table.html).
 
 ## Value
 

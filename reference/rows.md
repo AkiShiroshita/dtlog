@@ -1,7 +1,7 @@
 # Row operations with a log
 
-These functions behave exactly like their \`data.table\` counterparts
-and report how many rows they removed, kept or combined.
+These functions behave exactly like their `data.table` counterparts and
+report how many rows they removed, kept or combined.
 
 ## Usage
 
@@ -28,7 +28,7 @@ fsetdiff(x, y, ...)
 
 - x, y, object, l:
 
-  The inputs, as in the corresponding \`data.table\` function.
+  The inputs, as in the corresponding `data.table` function.
 
 - ...:
 
@@ -36,7 +36,7 @@ fsetdiff(x, y, ...)
 
 ## Value
 
-Whatever the \`data.table\` function returns.
+Whatever the `data.table` function returns.
 
 ## Examples
 

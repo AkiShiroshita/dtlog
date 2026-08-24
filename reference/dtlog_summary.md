@@ -14,15 +14,16 @@ dtlog_summary(.data)
 
 - .data:
 
-  A \`data.table\` (or any data frame).
+  A `data.table` (or any data frame).
 
 ## Value
 
-\`.data\`, unchanged and returned visibly.
+`.data`, unchanged and returned visibly.
 
 ## See also
 
-\[dt_log()\] to write a transcript of a whole session to a file.
+[`dt_log()`](https://akishiroshita.github.io/dtlog/reference/dt_log.md)
+to write a transcript of a whole session to a file.
 
 ## Examples
 

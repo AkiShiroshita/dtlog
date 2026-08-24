@@ -1,10 +1,10 @@
 # Describe the variables of a data table
 
-\`dttable()\` describes a \`data.table\` rather than cross tabulating
-it. Given a single \`data.table\` it reports one row per column – the
-name, the number of unique values, and the values themselves – and
-returns that description as a \`data.table\` with the columns
-\`Variable\`, \`N_unique\` and \`Unique_value\`.
+`dttable()` describes a `data.table` rather than cross tabulating it.
+Given a single `data.table` it reports one row per column – the name,
+the number of unique values, and the values themselves – and returns
+that description as a `data.table` with the columns `Variable`,
+`N_unique` and `Unique_value`.
 
 ## Usage
 
@@ -16,52 +16,57 @@ dttable(...)
 
 - ...:
 
-  The vectors to tabulate, as in \[base::table()\], or a single
-  \`data.table\` to describe.
+  The vectors to tabulate, as in
+  [`base::table()`](https://rdrr.io/r/base/table.html), or a single
+  `data.table` to describe.
 
 ## Value
 
-For a single \`data.table\`, a \`data.table\` with the columns
-\`Variable\`, \`N_unique\` and \`Unique_value\`, returned invisibly. For
-anything else, whatever \[base::table()\] returns.
+For a single `data.table`, a `data.table` with the columns `Variable`,
+`N_unique` and `Unique_value`, returned invisibly. For anything else,
+whatever [`base::table()`](https://rdrr.io/r/base/table.html) returns.
 
 ## Details
 
-\`dttable()\` is a function of its own: it does not mask
-\[base::table()\], and loading \`dtlog\` leaves \`table()\` exactly as
-it was. Every call that is not a single \`data.table\` is handed to
-\[base::table()\] unchanged, so \`dttable(dt\$sex, dt\$death)\`,
-\`dttable(x, useNA = "ifany")\` and \`dttable(as.data.frame(dt))\`
-return what \[base::table()\] returns. Describing a single
-\`data.table\` is the only thing \`dttable()\` adds.
+`dttable()` is a function of its own: it does not mask
+[`base::table()`](https://rdrr.io/r/base/table.html), and loading
+`dtlog` leaves [`table()`](https://rdrr.io/r/base/table.html) exactly as
+it was. Every call that is not a single `data.table` is handed to
+[`base::table()`](https://rdrr.io/r/base/table.html) unchanged, so
+`dttable(dt$sex, dt$death)`, `dttable(x, useNA = "ifany")` and
+`dttable(as.data.frame(dt))` return what
+[`base::table()`](https://rdrr.io/r/base/table.html) returns. Describing
+a single `data.table` is the only thing `dttable()` adds.
 
-A column with 20 or more unique values is reported as \*possibly
-continuous\* rather than listed; the option \`dtlog.table_max_unique\`
-moves that point, and \`Inf\` lists every column however many values it
+A column with 20 or more unique values is reported as *possibly
+continuous* rather than listed; the option `dtlog.table_max_unique`
+moves that point, and `Inf` lists every column however many values it
 holds. A list column is reported as such, and a list of values longer
 than 80 characters is truncated.
 
 The values are listed in the order the column sorts in: numbers
 ascending, characters alphabetically, dates and times chronologically,
-factors and ordered factors by their levels, \`FALSE\` before \`TRUE\`.
-Each value is written the way its own class writes it, so an \`ITime\`
-is listed as \`09:00:00\` rather than as the seconds it is stored as. A
-type that cannot be sorted keeps the order its values appear in.
+factors and ordered factors by their levels, `FALSE` before `TRUE`. Each
+value is written the way its own class writes it, so an `ITime` is
+listed as `09:00:00` rather than as the seconds it is stored as. A type
+that cannot be sorted keeps the order its values appear in.
 
-Missing values are listed and counted like any other value: \`NA\`
-(including \`NA\` as a level of a factor) appears as \`Missing\`,
-\`NaN\` as \`NaN\`, and both are counted in \`N_unique\`. They sort
-last, so a column that has any ends with \`Missing\`. An empty string is
-a value of its own, not a missing one.
+Missing values are listed and counted like any other value: `NA`
+(including `NA` as a level of a factor) appears as `Missing`, `NaN` as
+`NaN`, and both are counted in `N_unique`. They sort last, so a column
+that has any ends with `Missing`. An empty string is a value of its own,
+not a missing one.
 
-The description goes through the same output as every other \`dtlog\`
-message, so it obeys \`dtlog.display\`, is silenced by
-\[dtlog_pause()\], and is written to the transcript opened by
-\[dt_log()\].
+The description goes through the same output as every other `dtlog`
+message, so it obeys `dtlog.display`, is silenced by
+[`dtlog_pause()`](https://akishiroshita.github.io/dtlog/reference/dtlog_pause.md),
+and is written to the transcript opened by
+[`dt_log()`](https://akishiroshita.github.io/dtlog/reference/dt_log.md).
 
 ## See also
 
-\[dtlog_summary()\] for the size and key of a table alone.
+[`dtlog_summary()`](https://akishiroshita.github.io/dtlog/reference/dtlog_summary.md)
+for the size and key of a table alone.
 
 ## Examples
 

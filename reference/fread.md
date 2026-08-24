@@ -12,11 +12,14 @@ fread(...)
 
 - ...:
 
-  All arguments of \[data.table::fread()\].
+  All arguments of
+  [`data.table::fread()`](https://rdrr.io/pkg/data.table/man/fread.html).
 
 ## Value
 
-The data table that \[data.table::fread()\] returns.
+The data table that
+[`data.table::fread()`](https://rdrr.io/pkg/data.table/man/fread.html)
+returns.
 
 ## Examples
 

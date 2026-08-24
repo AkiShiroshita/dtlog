@@ -16,11 +16,14 @@ as.data.table(x, ...)
 
 - ...:
 
-  All other arguments of \[data.table::as.data.table()\].
+  All other arguments of
+  [`data.table::as.data.table()`](https://rdrr.io/pkg/data.table/man/as.data.table.html).
 
 ## Value
 
-The \`data.table\` that \[data.table::as.data.table()\] returns.
+The `data.table` that
+[`data.table::as.data.table()`](https://rdrr.io/pkg/data.table/man/as.data.table.html)
+returns.
 
 ## Examples
 

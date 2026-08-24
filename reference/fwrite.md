@@ -16,16 +16,19 @@ fwrite(x, ...)
 
 - ...:
 
-  All other arguments of \[data.table::fwrite()\].
+  All other arguments of
+  [`data.table::fwrite()`](https://rdrr.io/pkg/data.table/man/fwrite.html).
 
 ## Value
 
-\`NULL\`, invisibly, as \[data.table::fwrite()\] returns it.
+`NULL`, invisibly, as
+[`data.table::fwrite()`](https://rdrr.io/pkg/data.table/man/fwrite.html)
+returns it.
 
 ## Examples
 
 ``` r
 dt <- data.table::data.table(a = 1:2, b = 3:4)
 fwrite(dt, tempfile())
-#> fwrite: wrote 2 rows and 2 columns to 'file197948d114ff'
+#> fwrite: wrote 2 rows and 2 columns to 'file19b54333aa65'
 ```

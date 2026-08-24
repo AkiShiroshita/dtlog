@@ -1,7 +1,7 @@
 # Modify a data table by reference, with a log
 
-These functions are the \`data.table\` \`set\*()\` functions. They still
-change their input by reference and return exactly what \`data.table\`
+These functions are the `data.table` `set*()` functions. They still
+change their input by reference and return exactly what `data.table`
 returns; they only report what they changed.
 
 ## Usage
@@ -36,7 +36,7 @@ setattr(x, ...)
 
 - x:
 
-  The data table (or, for \[setDT()\], the object to convert).
+  The data table (or, for `setDT()`, the object to convert).
 
 - ...:
 
@@ -44,7 +44,7 @@ setattr(x, ...)
 
 ## Value
 
-Whatever the corresponding \`data.table\` function returns.
+Whatever the corresponding `data.table` function returns.
 
 ## Examples
 
