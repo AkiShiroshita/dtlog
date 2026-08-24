@@ -11,10 +11,9 @@ namespace conflicts is to use the `conflicted` package.
 The operations themselves are never changed: `dtlog` only adds a
 message. Modification by reference (`:=`, `set*()`), keys, indices,
 return values and visibility all behave exactly as they do in
-`data.table`. The one thing that is not identical is that `with=` and
-`which=` are evaluated twice, once by `dtlog` to classify the call and
-once by `data.table`; this is only noticeable if such an argument is
-written as an expression with a side effect.
+`data.table`, and every argument is evaluated exactly as often as
+`data.table` evaluates it, so an argument written as an expression with
+a side effect still runs only once.
 
 ## Options
 

@@ -54,11 +54,9 @@ use the <code>conflicted</code> package.</p>
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p>The operations themselves are never changed: <code>dtlog</code> only adds a message.
 Modification by reference (<code>:=</code>, <code>set*()</code>), keys, indices, return values and
-visibility all behave exactly as they do in <code>data.table</code>. The one thing that
-is not identical is that <code>with=</code> and <code>which=</code> are evaluated twice, once by
-<code>dtlog</code> to classify the call and once by <code>data.table</code>; this is only
-noticeable if such an argument is written as an expression with a side
-effect.</p>
+visibility all behave exactly as they do in <code>data.table</code>, and every argument
+is evaluated exactly as often as <code>data.table</code> evaluates it, so an argument
+written as an expression with a side effect still runs only once.</p>
     </div>
     <div class="section level2">
     <h2 id="options">Options<a class="anchor" aria-label="anchor" href="#options"></a></h2>
