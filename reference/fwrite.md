@@ -30,5 +30,5 @@ returns it.
 ``` r
 dt <- data.table::data.table(a = 1:2, b = 3:4)
 fwrite(dt, tempfile())
-#> fwrite: wrote 2 rows and 2 columns to 'file19b36bf3a375'
+#> fwrite: wrote 2 rows and 2 columns to 'file19aff078c59'
 ```
