@@ -290,7 +290,7 @@ dt_log_end()
 
 | argument |  |
 |----|----|
-| `file` | where to write.`dt_log(NULL)` is the same as [`dt_log_end()`](https://akishiroshita.github.io/dtlog/reference/dt_log.md) |
+| `file` | where to write; there is no default.`dt_log(NULL)` is the same as [`dt_log_end()`](https://akishiroshita.github.io/dtlog/reference/dt_log.md) |
 | `append` | add to an existing file instead of overwriting it |
 | `code` | `FALSE` writes the messages without the calls |
 | `echo` | `FALSE` writes only to the file and leaves the console quiet |

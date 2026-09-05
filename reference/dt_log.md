@@ -8,7 +8,7 @@ to you; nothing is written before the first call or after the second.
 ## Usage
 
 ``` r
-dt_log(file = "dtlog.txt", append = FALSE, code = TRUE, echo = TRUE)
+dt_log(file, append = FALSE, code = TRUE, echo = TRUE)
 
 dt_log_end()
 
@@ -19,8 +19,10 @@ dt_log_file()
 
 - file:
 
-  Path of the text file. `NULL` ends the current transcript, so
-  `dt_log(NULL)` is the same as `dt_log_end()`.
+  Path of the text file. There is no default: name a path yourself, so
+  that nothing is ever written to a place you did not choose. `NULL`
+  ends the current transcript, so `dt_log(NULL)` is the same as
+  `dt_log_end()`.
 
 - append:
 
@@ -107,15 +109,15 @@ dt[, kpl := mpg * 0.425]
 #>       mpg   cyl  disp    hp  drat    wt  qsec    vs    am  gear  carb     kpl
 #>     <num> <num> <num> <num> <num> <num> <num> <num> <num> <num> <num>   <num>
 dt_log_end()
-#> dt_log: wrote 2 operations to '/tmp/Rtmp9Iv6Rp/file19af190c656b.txt'
+#> dt_log: wrote 2 operations to '/tmp/RtmpHTK8K8/file192224eabf59.txt'
 cat(readLines(path), sep = "\n")
-#> # dtlog transcript, started 2026-08-24 15:20:42
-#> # R version 4.6.1 (2026-06-24), data.table 1.18.4, dtlog 0.1.0
+#> # dtlog transcript, started 2026-09-05 21:31:25
+#> # R version 4.6.1 (2026-06-24), data.table 1.18.6.1, dtlog 0.1.0
 #> > dt[mpg > 20]
 #> filter: removed 18 rows (56%), 14 rows remaining
 #> 
 #> > dt[, `:=`(kpl, mpg * 0.425)]
 #> mutate: new variable 'kpl' (double) with 25 unique values and 0% NA
 #> 
-#> # dtlog transcript, ended 2026-08-24 15:20:42 (2 operations)
+#> # dtlog transcript, ended 2026-09-05 21:31:25 (2 operations)
 ```

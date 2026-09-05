@@ -49,6 +49,9 @@
   reports where it is going, and
   [`dtlog_summary()`](https://akishiroshita.github.io/dtlog/reference/dtlog_summary.md)
   reports the size and key of a table.
+  [`dt_log()`](https://akishiroshita.github.io/dtlog/reference/dt_log.md)
+  has no default path: the transcript is written where you name it and
+  nowhere else.
 
 - [`dtlog_pause()`](https://akishiroshita.github.io/dtlog/reference/dtlog_pause.md)
   and
