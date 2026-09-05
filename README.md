@@ -267,7 +267,7 @@ left_join: added one column (label)
 
 | argument   |                                                                 |
 | ---------- | --------------------------------------------------------------- |
-| `file`   | where to write.`dt_log(NULL)` is the same as `dt_log_end()` |
+| `file`   | where to write; there is no default.`dt_log(NULL)` is the same as `dt_log_end()` |
 | `append` | add to an existing file instead of overwriting it               |
 | `code`   | `FALSE` writes the messages without the calls                 |
 | `echo`   | `FALSE` writes only to the file and leaves the console quiet  |

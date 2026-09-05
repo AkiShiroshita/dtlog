@@ -10,8 +10,10 @@
 #' and survives a session that ends without `dt_log_end()` (only the closing
 #' line is then missing).
 #'
-#' @param file Path of the text file. `NULL` ends the current transcript, so
-#'   `dt_log(NULL)` is the same as `dt_log_end()`.
+#' @param file Path of the text file. There is no default: name a path
+#'   yourself, so that nothing is ever written to a place you did not choose.
+#'   `NULL` ends the current transcript, so `dt_log(NULL)` is the same as
+#'   `dt_log_end()`.
 #' @param append Append to an existing file instead of overwriting it.
 #' @param code Write the call above its log. Set to `FALSE` for the messages
 #'   alone.
@@ -27,7 +29,11 @@
 #' dt_log_end()
 #' cat(readLines(path), sep = "\n")
 #' @export
-dt_log <- function(file = "dtlog.txt", append = FALSE, code = TRUE, echo = TRUE) {
+dt_log <- function(file, append = FALSE, code = TRUE, echo = TRUE) {
+  if (missing(file)) {
+    stop("dt_log(): `file` must be a single path; there is no default",
+         call. = FALSE)
+  }
   if (is.null(file)) return(dt_log_end())
   flag <- function(x) is.logical(x) && length(x) == 1L && !is.na(x)
   if (!is.character(file) || length(file) != 1L || !nzchar(file)) {

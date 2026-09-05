@@ -23,7 +23,8 @@
 
 * `dt_log()` and `dt_log_end()` write the messages to a transcript file,
   `dt_log_file()` reports where it is going, and `dtlog_summary()` reports the
-  size and key of a table.
+  size and key of a table. `dt_log()` has no default path: the transcript is
+  written where you name it and nowhere else.
 
 * `dtlog_pause()` and `dtlog_resume()` turn logging off and on. The options
   `dtlog.display`, `dtlog.detail`, `dtlog.log_from_packages` and

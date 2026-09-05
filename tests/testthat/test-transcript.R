@@ -94,6 +94,15 @@ test_that("append and overwrite behave as documented", {
   expect_equal(length(readLines(path)), first)
 })
 
+test_that("dt_log() has no default path", {
+  # CRAN policy: nothing may be written to the user's file space unasked, so
+  # the transcript has to be named rather than defaulted to the working
+  # directory.
+  expect_error(dt_log(), "there is no default")
+  expect_null(dt_log_file())
+  expect_false(file.exists("dtlog.txt"))
+})
+
 test_that("dt_log() rejects arguments that are not flags", {
   expect_error(dt_log(tempfile(), append = data.table::data.table(a = 1)),
                "must be TRUE or FALSE")

@@ -1,3 +1,37 @@
+## Resubmission
+
+This is a resubmission of the first submission of 'dtlog' (version 0.1.0).
+
+The reviewer wrote:
+
+> Please ensure that your functions do not write by default or in your
+> examples/vignettes/tests in the user's home filespace (including the package
+> directory and getwd()). This is not allowed by CRAN policies. Please omit any
+> default path in writing functions. In your examples/vignettes/tests you can
+> write to tempdir().
+
+`dt_log()`, the one function in the package that creates a file, had
+`file = "dtlog.txt"` as its default and so would have written to `getwd()` when
+called without a path. That default is gone: `file` is now a required argument,
+and `dt_log()` called without one stops with
+
+```
+Error: dt_log(): `file` must be a single path; there is no default
+```
+
+The documentation of the argument says so, and
+`tests/testthat/test-transcript.R` checks both the error and that no
+`dtlog.txt` is left behind.
+
+No other function in the package writes a file of its own. `fwrite()` is a
+logging wrapper around `data.table::fwrite()`, which has no default path
+either, and the transcript is only ever written to the path the user passes to
+`dt_log()`.
+
+Every example, the vignette and the whole test suite already wrote to
+`tempfile()` only, and they still do. I re-checked the sources for a written
+path outside `tempdir()` and found none.
+
 ## Submission
 
 This is the first submission of 'dtlog' (version 0.1.0).
@@ -30,11 +64,16 @@ This is the first submission of 'dtlog' (version 0.1.0).
   * Fedora Linux 42, x86_64-pc-linux-gnu, R-devel (2026-06-21 r90185), with
     the suggested packages made unavailable ('nosuggests')
 
-* Local, `R CMD check --as-cran` (2026-08-24) -- Status: 1 NOTE.
-  Windows 11 x64 (build 26200), x86_64-w64-mingw32,
+* Local, `R CMD check --as-cran` (2026-09-05, this resubmission) --
+  Status: 1 NOTE. Windows 11 x64 (build 26200), x86_64-w64-mingw32,
   R 4.6.0 (2026-04-24 ucrt).
 
 ## R CMD check results
+
+The win-builder, GitHub Actions and R-hub runs dated 2026-08-24 are those of
+the first submission; the change described above is the only difference between
+that source and this one, and it has been re-checked locally (2026-09-05,
+Status: 1 NOTE, the new-submission note alone).
 
 Every GitHub Actions and R-hub platform above reports Status: OK -- 0 errors,
 0 warnings, 0 notes. Both win-builder runs (R-release and R-devel) and the

@@ -6,15 +6,17 @@
 \alias{dt_log_file}
 \title{Write the code and its log to a text file}
 \usage{
-dt_log(file = "dtlog.txt", append = FALSE, code = TRUE, echo = TRUE)
+dt_log(file, append = FALSE, code = TRUE, echo = TRUE)
 
 dt_log_end()
 
 dt_log_file()
 }
 \arguments{
-\item{file}{Path of the text file. \code{NULL} ends the current transcript, so
-\code{dt_log(NULL)} is the same as \code{dt_log_end()}.}
+\item{file}{Path of the text file. There is no default: name a path
+yourself, so that nothing is ever written to a place you did not choose.
+\code{NULL} ends the current transcript, so \code{dt_log(NULL)} is the same as
+\code{dt_log_end()}.}
 
 \item{append}{Append to an existing file instead of overwriting it.}
 
