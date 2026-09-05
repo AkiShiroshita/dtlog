@@ -38,46 +38,48 @@ This is the first submission of 'dtlog' (version 0.1.0).
 
 ## Test environments
 
-* win-builder, R release 4.6.1 (2026-06-24 ucrt), Windows Server 2022 x64
-  (build 20348), x86_64-w64-mingw32 -- Status: 1 NOTE (2026-08-24).
+Every environment below was re-checked on 2026-09-05, on the source of this
+resubmission.
 
-* win-builder, R Under development (unstable) (2026-08-22 r90443 ucrt),
-  Windows Server 2022 x64 (build 20348), x86_64-w64-mingw32 -- Status: 1 NOTE
-  (2026-08-24).
+* win-builder, R release, Windows Server 2022 x64, x86_64-w64-mingw32 --
+  submitted 2026-09-05.
 
-* GitHub Actions, `R CMD check --as-cran` (2026-08-24) -- Status: OK on each
+* win-builder, R Under development (unstable), Windows Server 2022 x64,
+  x86_64-w64-mingw32 -- submitted 2026-09-05.
+
+* GitHub Actions, `R CMD check --as-cran` (2026-09-05) -- Status: OK on each
   of:
 
-  * Ubuntu 24.04.4 LTS, x86_64-pc-linux-gnu, R-devel (2026-06-21 r90185)
+  * Ubuntu 24.04.4 LTS, x86_64-pc-linux-gnu, R-devel (2026-09-04 r90492)
   * Ubuntu 24.04.4 LTS, x86_64-pc-linux-gnu, R 4.6.1 (2026-06-24)
   * Ubuntu 24.04.4 LTS, x86_64-pc-linux-gnu, R 4.5.3 (2026-03-11), oldrel-1
-  * macOS Tahoe 26.5.2, aarch64-apple-darwin23, R 4.6.1 (2026-06-24)
+  * macOS Tahoe 26.6.2, aarch64-apple-darwin23, R 4.6.1 (2026-06-24)
   * Windows Server 2022 x64 (build 26100), x86_64-w64-mingw32,
     R 4.6.1 (2026-06-24 ucrt)
 
-* R-hub v2, `R CMD check` (2026-08-24) -- Status: OK on each of:
+* R-hub v2, `R CMD check` (2026-09-05) -- Status: OK on each of:
 
-  * macOS Sequoia 15.7.7, x86_64-apple-darwin20,
-    R-devel (2026-06-24 r90190)
-  * Ubuntu 22.04.5 LTS, x86_64-pc-linux-gnu, R-devel (2026-08-22 r90443),
+  * macOS Sequoia 15.7.9, x86_64-apple-darwin20,
+    R-devel (2026-09-04 r90492)
+  * Ubuntu 22.04.5 LTS, x86_64-pc-linux-gnu, R-devel (2026-09-04 r90492),
     built without long doubles ('nold')
   * Fedora Linux 42, x86_64-pc-linux-gnu, R-devel (2026-06-21 r90185), with
     the suggested packages made unavailable ('nosuggests')
 
-* Local, `R CMD check --as-cran` (2026-09-05, this resubmission) --
-  Status: 1 NOTE. Windows 11 x64 (build 26200), x86_64-w64-mingw32,
+* Local, `R CMD check --as-cran` (2026-09-05) -- Status: 1 NOTE.
+  Windows 11 x64 (build 26200), x86_64-w64-mingw32,
   R 4.6.0 (2026-04-24 ucrt).
 
 ## R CMD check results
 
-The win-builder, GitHub Actions and R-hub runs dated 2026-08-24 are those of
-the first submission; the change described above is the only difference between
-that source and this one, and it has been re-checked locally (2026-09-05,
-Status: 1 NOTE, the new-submission note alone).
-
 Every GitHub Actions and R-hub platform above reports Status: OK -- 0 errors,
 0 warnings, 0 notes. Both win-builder runs (R-release and R-devel) and the
 local run report 0 errors | 0 warnings | 1 note.
+
+<!-- TODO before sending: the win-builder runs of 2026-09-05 are still in the
+     queue. Replace the two "submitted 2026-09-05" lines above with their R
+     versions and Status once the result mails arrive, and confirm the note is
+     the new-submission one. -->
 
 The note is the expected one for a package not yet on CRAN:
 
