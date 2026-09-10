@@ -58,6 +58,7 @@ run_wrapped <- function(name, cl, pf, before = NULL, log_fn = NULL,
 # functions that do not use substitute() on their arguments.
 logged <- function(name, cl, pf, log_fn = NULL, values = NULL, args = NULL,
                    match = FALSE) {
+  cl <- expand_dots(cl, pf)
   written_call <- cl
   bindings <- list()
   if (length(values) || isTRUE(match)) {
@@ -90,6 +91,30 @@ logged <- function(name, cl, pf, log_fn = NULL, values = NULL, args = NULL,
   }
   before$.call <- written_call
   run_wrapped(name, cl, pf, before, log_fn, bindings = bindings)
+}
+
+# A wrapper is declared as function(...), so a call that reaches it through a
+# function which passes its own dots on -- lapply(files, fread) becomes
+# FUN(X[[i]], ...) -- carries a literal `...` that belongs to `pf`, not to the
+# wrapper. match.call() would expand it with the wrapper's own dots instead,
+# turning fread(path) into fread(input = path, file = ..1), which then fails
+# when the call is re-evaluated in `pf` where that ..1 does not exist. Writing
+# the caller's own ..1, ..2, ... into the call keeps every argument the promise
+# `pf` holds, so nothing is evaluated in the wrong environment or twice.
+expand_dots <- function(cl, pf) {
+  if (length(cl) < 2L) return(cl)
+  k <- match("...", vapply(as.list(cl), symbol_text, character(1L)), nomatch = 0L)
+  if (k < 2L) return(cl)
+  # substitute() reads the expressions the dots hold without forcing them, and
+  # gives NULL when the frame has no dots left to pass on
+  dots <- tryCatch(eval(quote(substitute(...())), pf), error = function(e) NULL)
+  if (!is.null(dots) && !is.pairlist(dots) && !is.list(dots)) return(cl)
+  supplied <- lapply(seq_along(dots), function(j) as.name(sprintf("..%d", j)))
+  names(supplied) <- names(dots)
+  parts <- as.list(cl)
+  out <- as.call(c(parts[seq_len(k - 1L)], supplied, parts[-seq_len(k)]))
+  if (!any(nzchar(names(out) %||% ""))) names(out) <- NULL
+  out
 }
 
 stopf_missing_call <- function(name) {
