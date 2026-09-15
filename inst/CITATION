@@ -1,0 +1,19 @@
+# CRAN adds Date/Publication to the DESCRIPTION it installs; a package built
+# from the repository has neither that nor a Date field, so fall back to the
+# current year. The version is read from meta, so a release need not touch this.
+year <- sub("-.*", "", c(meta$`Date/Publication`, meta$Date, "")[1])
+if (!nzchar(year)) {
+  year <- format(Sys.Date(), "%Y")
+}
+note <- sprintf("R package version %s", meta$Version)
+
+citHeader("To cite dtlog in publications, please use:")
+
+bibentry(
+  bibtype  = "Manual",
+  title    = "{dtlog}: Logging for 'data.table' Operations",
+  author   = person("Akihiro", "Shiroshita"),
+  year     = year,
+  note     = note,
+  url      = "https://CRAN.R-project.org/package=dtlog"
+)

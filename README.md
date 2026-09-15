@@ -1,5 +1,12 @@
 # dtlog <img src="man/figures/logo.png" align="right" height="139" alt="" />
 
+<!-- badges: start -->
+[![R-CMD-check](https://github.com/AkiShiroshita/dtlog/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/AkiShiroshita/dtlog/actions/workflows/R-CMD-check.yaml)
+[![CRAN status](https://www.r-pkg.org/badges/version/dtlog)](https://CRAN.R-project.org/package=dtlog)
+[![Codecov test coverage](https://codecov.io/gh/AkiShiroshita/dtlog/branch/main/graph/badge.svg)](https://app.codecov.io/gh/AkiShiroshita/dtlog?branch=main)
+[![dtlog downloads](https://cranlogs.r-pkg.org/badges/dtlog)](https://CRAN.R-project.org/package=dtlog)
+<!-- badges: end -->
+
 `data.table` is fast and memory-efficient. It is particularly powerful for large datasets. 
 
 However,`DT[i, j, by]` is terse. Reading a script rarely tells
@@ -58,6 +65,14 @@ setkey(dt, cyl)
 ```
 
 ## Installation
+
+From CRAN:
+
+```r
+install.packages("dtlog")
+```
+
+The development version from GitHub:
 
 ```r
 # install.packages("remotes")
@@ -324,6 +339,12 @@ dt[, lag_mpg := shift(mpg)]
 `shift()` itself is not wrapped. It works on vectors and runs once per group, so
 wrapping it would print one message per group. The `:=` around it already tells
 you that a lag column appeared and how many `NA`s it has.
+
+## Citation
+
+```r
+citation("dtlog")
+```
 
 ## License
 
