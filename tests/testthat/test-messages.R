@@ -373,6 +373,103 @@ test_that("the compact detail level avoids value level information", {
   expect_match(msgs2[2L], "rows: was 32, now 18")
 })
 
+test_that("foverlaps reports the rows it matched and the columns it added", {
+  env <- fresh_env()
+  expect_dtlog_message(
+    quote(foverlaps(SPAN, WINDOW)),
+    "^foverlaps: 3 rows in, 3 rows out, added 2 columns \\(i\\.s, i\\.e\\)", env)
+  # which = TRUE answers with row numbers, and none of x's columns come back
+  expect_dtlog_message(quote(foverlaps(SPAN, WINDOW, which = TRUE)),
+                       "^foverlaps: 3 rows in, 3 matching pairs out", env)
+  expect_dtlog_message(
+    quote(foverlaps(SPAN, WINDOW, which = TRUE, mult = "first")),
+    "^foverlaps: 3 rows in, 3 row numbers out", env)
+})
+
+test_that("setnafill reports the NAs it filled and the ones it left", {
+  env <- fresh_env()
+  expect_dtlog_message(quote(setnafill(NAFILL, type = "const", fill = 0)),
+                       "^setnafill: filled 4 NAs in 2 columns \\(a, b\\)", env)
+  # the second call has nothing left to do
+  expect_dtlog_message(quote(setnafill(NAFILL, type = "const", fill = 0)),
+                       "^setnafill: no NAs to fill", env)
+  env2 <- fresh_env()
+  expect_dtlog_message(
+    quote(setnafill(NAFILL, type = "const", fill = 0, cols = "a")),
+    "^setnafill: filled 2 NAs in one column \\(a\\), 2 NAs remaining", env2)
+})
+
+test_that("setdroplevels names the levels it dropped", {
+  env <- fresh_env()
+  expect_dtlog_message(quote(setdroplevels(FACTORS)),
+                       "^setdroplevels: dropped 2 levels from 2 columns \\(k: c, m: q\\)",
+                       env)
+  expect_dtlog_message(quote(setdroplevels(FACTORS)),
+                       "^setdroplevels: no levels dropped", env)
+})
+
+test_that("an aggregation over grouping sets reports itself once", {
+  env <- fresh_env()
+  # data.table runs one `x[, j, by]` per grouping set and evaluates each of them
+  # in the caller's frame, so without the wrapper silencing them the user would
+  # read four group_by/summarize pairs for one rollup()
+  expect_identical(
+    dtlog_messages(quote(rollup(GROUPS, j = sum(v), by = c("g", "h"))), env),
+    "rollup: now 6 rows and 3 columns (was 3 rows and 3 columns)")
+  expect_identical(
+    dtlog_messages(quote(cube(GROUPS, j = sum(v), by = c("g", "h"))), env),
+    "cube: now 8 rows and 3 columns (was 3 rows and 3 columns)")
+  expect_identical(
+    dtlog_messages(quote(groupingsets(GROUPS, j = sum(v), by = c("g", "h"),
+                                      sets = list("g", "h"))), env),
+    "groupingsets: now 4 rows and 3 columns (was 3 rows and 3 columns)")
+  # the silence lasts exactly as long as the call
+  expect_dtlog_message(quote(GROUPS[v > 1]), "^filter: removed one row", env)
+
+  # a result that is not the shape the log expects is passed over rather than
+  # described wrongly. No call a user can write gets here, so it is checked
+  # directly, as the reshape fallbacks are.
+  expect_silent(log_grouping_sets("rollup")(1:3, list(), NULL, NULL))
+  expect_silent(log_split(1:3, list(), NULL, NULL))
+})
+
+test_that("an error inside a silenced call still leaves logging on", {
+  env <- fresh_env()
+  expect_error(eval(quote(rollup(GROUPS, j = stop("boom"), by = "g")), env),
+               "boom")
+  expect_dtlog_message(quote(GROUPS[v > 1]), "^filter: removed one row", env)
+})
+
+test_that("a call made while logging is paused leaves it paused", {
+  env <- fresh_env()
+  quiet(dtlog_pause())
+  on.exit(quiet(dtlog_resume()), add = TRUE)
+  expect_silent(eval(quote(rollup(GROUPS, j = sum(v), by = "g")), env))
+  expect_silent(eval(quote(GROUPS[v > 1]), env))
+})
+
+test_that("the remaining wrapped functions report what they did", {
+  env <- fresh_env()
+  expect_dtlog_message(quote(fsetequal(OTHER, OTHER)),
+                       "^fsetequal: the two tables hold the same rows \\(2 rows each\\)",
+                       env)
+  expect_dtlog_message(
+    quote(fsetequal(OTHER, HALF)),
+    "^fsetequal: the two tables do not hold the same rows \\(2 rows and one row\\)",
+    env)
+  # the two split messages differ only by a suffix, so they are compared whole
+  expect_identical(dtlog_messages(quote(split(GROUPS, by = "g")), env),
+                   "split: 3 rows into 2 tables (a: 2 rows, b: one row)")
+  # splitting on two columns without flattening nests one list inside another,
+  # and then there is no row count to report for the parts
+  expect_identical(
+    dtlog_messages(quote(split(GROUPS, by = c("g", "h"), flatten = FALSE)), env),
+    "split: 3 rows into 2 tables")
+  expect_dtlog_message(quote(copy(OTHER)),
+                       "^copy: deep copy of 2 rows and 2 columns", env)
+  expect_dtlog_message(quote(copy(1:5)), "^copy: deep copy \\(length 5\\)", env)
+})
+
 test_that("calls from other packages are silent by default", {
   # data.table calls inside a package namespace must not produce output
   f <- function() {

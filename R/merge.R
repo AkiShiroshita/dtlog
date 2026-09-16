@@ -153,3 +153,56 @@ join_lines <- function(stats, total, type, nrow_x, nrow_y,
     line(4L)
   )
 }
+
+#' Join two data tables on overlapping intervals, with a log
+#'
+#' Reports how many rows went in and came out, and which columns the join
+#' added. `foverlaps()` matches a row of `x` against every row of `y` whose
+#' interval overlaps it, so the result can be longer as well as shorter than
+#' `x`, and the row count is the part worth seeing.
+#'
+#' @param x,y The data tables to join. Both carry the interval as two columns,
+#'   and `y` has to be keyed on them.
+#' @param ... All other arguments of [data.table::foverlaps()].
+#' @return Whatever [data.table::foverlaps()] returns: the matched rows, or,
+#'   with `which = TRUE`, the row numbers that matched.
+#' @examples
+#' x <- data.table::data.table(s = c(1, 5), e = c(3, 7))
+#' y <- data.table::data.table(s = c(2, 6), e = c(4, 8))
+#' data.table::setkey(y, s, e)
+#' data.table::foverlaps(x, y)
+#' @rawNamespace export("foverlaps")
+foverlaps <- function(x, y, ...) {
+  values <- list()
+  if (!missing(x)) values$x <- x
+  if (!missing(y)) values$y <- y
+  logged("foverlaps", sys.call(), parent.frame(), log_foverlaps, values)
+}
+
+log_foverlaps <- function(out, before, cl, pf) {
+  x <- before$x
+  if (is.null(x)) return(invisible(NULL))
+  # which = TRUE answers with row numbers instead of rows: a two column table
+  # of pairs, or a plain vector when mult= asks for one match per row
+  if (!is.data.frame(out)) {
+    if (!is.atomic(out)) return(invisible(NULL))
+    return(display(sprintf(
+      "foverlaps: %s in, %s out", plural(x$nrow, "row"),
+      plural(length(out), "row number")
+    )))
+  }
+  if (!all(x$names %in% names(out))) {
+    return(display(sprintf(
+      "foverlaps: %s in, %s out", plural(x$nrow, "row"),
+      plural(nrow(out), "matching pair")
+    )))
+  }
+  added <- setdiff(names(out), x$names)
+  display(sprintf(
+    "foverlaps: %s in, %s out%s", plural(x$nrow, "row"), plural(nrow(out), "row"),
+    if (length(added)) {
+      sprintf(", added %s (%s)", plural(length(added), "column"),
+              format_list(added))
+    } else ""
+  ))
+}

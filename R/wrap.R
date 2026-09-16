@@ -24,17 +24,35 @@ original <- function(name) {
 # extraction such as `l$dt` they write back by reference. See bracket_env(),
 # which relies on the same two properties.
 run_wrapped <- function(name, cl, pf, before = NULL, log_fn = NULL,
-                        bindings = list()) {
+                        bindings = list(), quiet = FALSE) {
   fun <- original(name)
   if (is.null(cl)) stopf_missing_call(name)
   cl[[1L]] <- as.name(name)
   env <- new.env(parent = pf)
   assign(name, fun, envir = env)
   for (nm in names(bindings)) assign(nm, bindings[[nm]], envir = env)
-  if (is.null(log_fn)) return(eval_visible(cl, env))
-  res <- withVisible(eval(cl, env))
+  if (is.null(log_fn)) {
+    return(if (quiet) with_inner_silenced(eval_visible(cl, env)) else
+      eval_visible(cl, env))
+  }
+  res <- if (quiet) with_inner_silenced(withVisible(eval(cl, env))) else
+    withVisible(eval(cl, env))
   with_logged_call(before$.call %||% cl, try_log(log_fn(res$value, before, cl, pf)))
   if (res$visible) res$value else invisible(res$value)
+}
+
+# rollup() and its relatives run one `x[, j, by]` per grouping set, and
+# data.table evaluates each of them in the frame the aggregation was called
+# from -- which is the frame dtlog reads to decide whether a call is the user's.
+# Those inner calls are the wrapper's, not the user's, and there is one of them
+# per set, so they are silenced while the call runs and the wrapper reports the
+# whole aggregation in one line. The state is restored before the log function
+# runs, so the line the wrapper does print is not silenced with them.
+with_inner_silenced <- function(expr) {
+  paused <- .state$paused
+  .state$paused <- TRUE
+  on.exit(.state$paused <- paused, add = TRUE)
+  expr
 }
 
 # The entry point every wrapper uses.
@@ -57,7 +75,7 @@ run_wrapped <- function(name, cl, pf, before = NULL, log_fn = NULL,
 # an argument passed positionally can be found by name. Only pass it for
 # functions that do not use substitute() on their arguments.
 logged <- function(name, cl, pf, log_fn = NULL, values = NULL, args = NULL,
-                   match = FALSE) {
+                   match = FALSE, quiet = FALSE) {
   cl <- expand_dots(cl, pf)
   written_call <- cl
   bindings <- list()
@@ -75,7 +93,7 @@ logged <- function(name, cl, pf, log_fn = NULL, values = NULL, args = NULL,
     if (is.null(substituted)) bindings <- list() else cl <- substituted
   }
   if (is.null(log_fn) || !should_log_call(pf)) {
-    return(run_wrapped(name, cl, pf, bindings = bindings))
+    return(run_wrapped(name, cl, pf, bindings = bindings, quiet = quiet))
   }
   before <- list()
   if (length(values)) {
@@ -90,7 +108,7 @@ logged <- function(name, cl, pf, log_fn = NULL, values = NULL, args = NULL,
     for (a in args) before[a] <- list(try_log(snap(resolved$values[[a]])))
   }
   before$.call <- written_call
-  run_wrapped(name, cl, pf, before, log_fn, bindings = bindings)
+  run_wrapped(name, cl, pf, before, log_fn, bindings = bindings, quiet = quiet)
 }
 
 # A wrapper is declared as function(...), so a call that reaches it through a

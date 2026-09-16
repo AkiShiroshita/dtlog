@@ -183,3 +183,54 @@ log_head_tail <- function(fun) {
     display(paste0(fun, ": ", rows_removed(before$x$nrow, nrow(out))))
   }
 }
+
+#' @rdname rows
+#' @rawNamespace export("fsetequal")
+fsetequal <- function(x, y, ...) {
+  logged("fsetequal", sys.call(), parent.frame(), log_fsetequal,
+         set_op_values(x, y))
+}
+
+log_fsetequal <- function(out, before, cl, pf) {
+  if (!is.logical(out) || length(out) != 1L) return(invisible(NULL))
+  x <- before$x
+  y <- before$y
+  sizes <- if (is.null(x) || is.null(y)) {
+    ""
+  } else if (x$nrow == y$nrow) {
+    sprintf(" (%s each)", plural(x$nrow, "row"))
+  } else {
+    sprintf(" (%s and %s)", plural(x$nrow, "row"), plural(y$nrow, "row"))
+  }
+  display(sprintf(
+    "fsetequal: the two tables %s the same rows%s",
+    if (isTRUE(out)) "hold" else "do not hold", sizes
+  ))
+}
+
+#' Copy a data table, with a log
+#'
+#' `data.table` modifies by reference, and [data.table::copy()] is the way out
+#' of that: it is the point where a second, independent table comes into
+#' existence. dtlog says so, and says how big the copy was.
+#'
+#' @param x The object to copy.
+#' @return The deep copy that [data.table::copy()] returns.
+#' @examples
+#' dt <- data.table::data.table(a = 1:3)
+#' safe <- data.table::copy(dt)
+#' @rawNamespace export("copy")
+copy <- function(x) {
+  logged("copy", sys.call(), parent.frame(), log_copy,
+         if (missing(x)) NULL else list(x = x))
+}
+
+log_copy <- function(out, before, cl, pf) {
+  if (!is.data.frame(out)) {
+    return(display(sprintf("copy: deep copy (%s)", dims(out))))
+  }
+  display(sprintf(
+    "copy: deep copy of %s and %s",
+    plural(nrow(out), "row"), plural(ncol(out), "column")
+  ))
+}

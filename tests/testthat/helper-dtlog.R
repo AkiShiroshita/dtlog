@@ -23,6 +23,15 @@ fresh_env <- function(native = FALSE) {
   env$QUERY <- data.table::data.table(t = c(2, 7), key = "t")
   env$cols <- c("hp", "wt")
   env$WITH_NA <- data.table::data.table(a = c(1, NA, 3), b = c(NA, 2, 3))
+  env$SPAN <- data.table::data.table(id = 1:3, s = c(1, 5, 10), e = c(3, 7, 12))
+  env$WINDOW <- data.table::data.table(s = c(2, 6), e = c(4, 8), key = c("s", "e"))
+  env$GROUPS <- data.table::data.table(g = c("a", "a", "b"),
+                                       h = c("x", "y", "x"), v = 1:3)
+  env$NAFILL <- data.table::data.table(a = c(1, NA, 3, NA), b = c(NA, 2, NA, 4))
+  env$FACTORS <- data.table::data.table(
+    k = factor(c("a", "b", "a"), levels = c("a", "b", "c")),
+    m = factor(c("p", "p", "p"), levels = c("p", "q"))
+  )
   env$WIDE <- data.table::data.table(id = 1:2, p = 3:4, q = 5:6)
   env$LONG <- data.table::melt(
     data.table::data.table(id = 1:2, p = 3:4, q = 5:6), id.vars = "id"
@@ -57,6 +66,10 @@ canonical <- function(x) {
   } else if (is.data.frame(x)) {
     list(columns = as.list(x), names = names(x), class = class(x),
          rownames = rownames(x))
+  } else if (is.list(x)) {
+    # split() answers with a list of data tables, each of which carries a
+    # pointer of its own
+    lapply(x, canonical)
   } else {
     x
   }

@@ -1,7 +1,7 @@
 Package: dtlog
 Type: Package
 Title: Logging for 'data.table' Operations
-Version: 0.1.1
+Version: 0.2.0
 Authors@R:
     person("Akihiro", "Shiroshita", , "akihirokun8@gmail.com",
            role = c("aut", "cre", "cph"),
@@ -19,7 +19,7 @@ License: MIT + file LICENSE
 Encoding: UTF-8
 Language: en-US
 Depends: R (>= 3.5.0)
-Imports: data.table (>= 1.14.0), stats, utils
+Imports: data.table (>= 1.16.0), stats, utils
 Suggests: testthat (>= 3.0.0), dplyr, tidyr, tidylog, tibble, knitr,
     rmarkdown
 Config/testthat/edition: 3

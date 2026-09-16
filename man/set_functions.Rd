@@ -14,6 +14,8 @@
 \alias{setDT}
 \alias{setDF}
 \alias{setattr}
+\alias{setnafill}
+\alias{setdroplevels}
 \title{Modify a data table by reference, with a log}
 \usage{
 setnames(x, ...)
@@ -39,6 +41,10 @@ setDT(x, ...)
 setDF(x, ...)
 
 setattr(x, ...)
+
+setnafill(x, ...)
+
+setdroplevels(x, ...)
 }
 \arguments{
 \item{x}{The data table (or, for \code{\link[=setDT]{setDT()}}, the object to convert).}
