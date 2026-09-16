@@ -1,7 +1,7 @@
 cff-version: 1.2.0
 title: "dtlog: Logging for 'data.table' Operations"
 version: 0.1.0
-date-released: 2026-08-22
+date-released: 2026-09-15
 
 authors:
   - family-names: "Shiroshita"
@@ -10,6 +10,7 @@ authors:
     orcid: "https://orcid.org/0000-0003-0262-459X"
 
 repository-code: "https://github.com/AkiShiroshita/dtlog"
+repository: "https://CRAN.R-project.org/package=dtlog"
 url: "https://akishiroshita.github.io/dtlog/"
 license: "MIT"
 keywords:
