@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">dtlog</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -33,6 +33,10 @@
     </div>
 
     <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.1.1" id="dtlog-011">dtlog 0.1.1<a class="anchor" aria-label="anchor" href="#dtlog-011"></a></h2>
+<ul><li>A logged function reached through another function that passes its own <code>...</code> on – <code>rbindlist(lapply(files, fread))</code>, and anything else of that shape – no longer fails with “the … list contains fewer than 1 element”. Such a call arrives as <code>FUN(X[[i]], ...)</code>, where the <code>...</code> belongs to the frame that made the call and not to the <code>function(...)</code> a dtlog wrapper is declared as. dtlog now reads those dots in the frame that holds them. The arguments stay the promises of that frame, so an expression such as <code>sep = mysep</code> is still resolved where it was written, and nothing is evaluated a second time.</li>
+</ul></div>
+    <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.1.0" id="dtlog-010">dtlog 0.1.0<a class="anchor" aria-label="anchor" href="#dtlog-010"></a></h2><p class="text-muted">CRAN release: 2026-09-15</p>
 <ul><li><p>First release.</p></li>
 <li><p>Logs <code>data.table</code> operations: the subsetting method <code>[.data.table</code> reports filters, sorts, column selection, modification by reference, grouping, aggregation and joins.</p></li>
@@ -42,7 +46,8 @@
 <li><p><code><a href="../reference/dt_log.html">dt_log()</a></code> and <code><a href="../reference/dt_log.html">dt_log_end()</a></code> write the messages to a transcript file, <code><a href="../reference/dt_log.html">dt_log_file()</a></code> reports where it is going, and <code><a href="../reference/dtlog_summary.html">dtlog_summary()</a></code> reports the size and key of a table. <code><a href="../reference/dt_log.html">dt_log()</a></code> has no default path: the transcript is written where you name it and nowhere else.</p></li>
 <li><p><code><a href="../reference/dtlog_pause.html">dtlog_pause()</a></code> and <code><a href="../reference/dtlog_pause.html">dtlog_resume()</a></code> turn logging off and on. The options <code>dtlog.display</code>, <code>dtlog.detail</code>, <code>dtlog.log_from_packages</code> and <code>dtlog.table_max_unique</code> control where the output goes and how much of it there is.</p></li>
 </ul></div>
-  </main></div>
+  </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
+    </nav></aside></div>
 
 
     <footer><div class="pkgdown-footer-left">

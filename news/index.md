@@ -1,5 +1,17 @@
 # Changelog
 
+## dtlog 0.1.1
+
+- A logged function reached through another function that passes its own
+  `...` on – `rbindlist(lapply(files, fread))`, and anything else of
+  that shape – no longer fails with “the … list contains fewer than 1
+  element”. Such a call arrives as `FUN(X[[i]], ...)`, where the `...`
+  belongs to the frame that made the call and not to the `function(...)`
+  a dtlog wrapper is declared as. dtlog now reads those dots in the
+  frame that holds them. The arguments stay the promises of that frame,
+  so an expression such as `sep = mysep` is still resolved where it was
+  written, and nothing is evaluated a second time.
+
 ## dtlog 0.1.0
 
 CRAN release: 2026-09-15
