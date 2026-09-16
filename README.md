@@ -5,6 +5,7 @@
 [![CRAN status](https://www.r-pkg.org/badges/version/dtlog)](https://CRAN.R-project.org/package=dtlog)
 [![Codecov test coverage](https://codecov.io/gh/AkiShiroshita/dtlog/branch/main/graph/badge.svg)](https://app.codecov.io/gh/AkiShiroshita/dtlog?branch=main)
 [![dtlog downloads](https://cranlogs.r-pkg.org/badges/dtlog)](https://CRAN.R-project.org/package=dtlog)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.22781756.svg)](https://doi.org/10.5281/zenodo.22781756)
 <!-- badges: end -->
 
 `data.table` is fast and memory-efficient. It is particularly powerful for large datasets. 

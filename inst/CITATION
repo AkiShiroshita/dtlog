@@ -15,5 +15,6 @@ bibentry(
   author   = person("Akihiro", "Shiroshita"),
   year     = year,
   note     = note,
-  url      = "https://CRAN.R-project.org/package=dtlog"
+  url      = "https://CRAN.R-project.org/package=dtlog",
+  doi      = "10.5281/zenodo.22781756"
 )
