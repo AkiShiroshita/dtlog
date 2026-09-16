@@ -184,6 +184,10 @@ test_that("fread() and fwrite() evaluate their arguments only once", {
   expect_evaluated_once(quote(fwrite(OTHER, file = tick(TMPFILE))))
   expect_evaluated_once(quote(fwrite(OTHER, TMPFILE, append = tick(TRUE))))
   expect_evaluated_once(quote(fwrite(tick(OTHER), TMPFILE)))
+  # and the same when the call reaches dtlog through a forwarded `...`
+  expect_evaluated_once(quote((function(...) fread(...))(tick("a,b
+1,2"))))
+  expect_evaluated_once(quote((function(...) fwrite(...))(OTHER, tick(TMPFILE))))
 })
 
 test_that("the arguments dtlog reads for its message are evaluated only once", {
