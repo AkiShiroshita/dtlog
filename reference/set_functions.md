@@ -30,6 +30,10 @@ setDT(x, ...)
 setDF(x, ...)
 
 setattr(x, ...)
+
+setnafill(x, ...)
+
+setdroplevels(x, ...)
 ```
 
 ## Arguments

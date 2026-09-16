@@ -1,5 +1,62 @@
 # Changelog
 
+## dtlog 0.2.0
+
+- Nine more `data.table` functions are logged.
+  [`foverlaps()`](https://akishiroshita.github.io/dtlog/reference/foverlaps.md)
+  reports the rows that went into the interval join and the rows and
+  columns that came out.
+  [`rollup()`](https://akishiroshita.github.io/dtlog/reference/grouping_sets.md),
+  [`cube()`](https://akishiroshita.github.io/dtlog/reference/grouping_sets.md)
+  and
+  [`groupingsets()`](https://akishiroshita.github.io/dtlog/reference/grouping_sets.md)
+  report the size of the aggregate.
+  [`split()`](https://rdrr.io/r/base/split.html) reports how many tables
+  the rows went into and how many rows each of them holds.
+  [`fsetequal()`](https://akishiroshita.github.io/dtlog/reference/rows.md)
+  reports whether the two tables hold the same rows.
+  [`setnafill()`](https://akishiroshita.github.io/dtlog/reference/set_functions.md)
+  reports how many `NA`s it filled and how many are left, and
+  [`setdroplevels()`](https://akishiroshita.github.io/dtlog/reference/set_functions.md)
+  which levels it dropped from which columns.
+  [`copy()`](https://akishiroshita.github.io/dtlog/reference/copy.md)
+  reports that a deep copy was made, and how big it is.
+
+- [`rollup()`](https://akishiroshita.github.io/dtlog/reference/grouping_sets.md),
+  [`cube()`](https://akishiroshita.github.io/dtlog/reference/grouping_sets.md)
+  and
+  [`groupingsets()`](https://akishiroshita.github.io/dtlog/reference/grouping_sets.md)
+  run one `x[, j, by]` per grouping set, and `data.table` evaluates each
+  of them in the frame the aggregation was called from – which is the
+  frame dtlog reads to decide whether a call is the user’s. Those inner
+  calls are now silenced while the aggregation runs, so one
+  [`rollup()`](https://akishiroshita.github.io/dtlog/reference/grouping_sets.md)
+  produces one line rather than one `group_by` and one `summarize` per
+  set. Logging that was already paused stays paused.
+
+- `Imports: data.table` moves from `>= 1.14.0` to `>= 1.16.0`.
+  [`setdroplevels()`](https://akishiroshita.github.io/dtlog/reference/set_functions.md)
+  was introduced in 1.16.0, and a package should not export a wrapper
+  for a function its own dependency declaration says may not be there.
+  Every other function dtlog wraps is older than 1.16.0, so that is the
+  oldest version the package can honestly ask for.
+
+- The README says which `data.table` functions are deliberately not
+  logged, and why: the ones that work on a vector inside `j` and would
+  print once per group
+  ([`shift()`](https://rdrr.io/pkg/data.table/man/shift.html),
+  [`frank()`](https://rdrr.io/pkg/data.table/man/frank.html),
+  [`nafill()`](https://rdrr.io/pkg/data.table/man/nafill.html),
+  [`fcase()`](https://rdrr.io/pkg/data.table/man/fcase.html) and the
+  rest), the ones with no before and after to compare
+  ([`data.table()`](https://rdrr.io/pkg/data.table/man/data.table.html),
+  [`key()`](https://rdrr.io/pkg/data.table/man/setkey.html),
+  [`setDTthreads()`](https://rdrr.io/pkg/data.table/man/openmp-utils.html)),
+  and [`cbindlist()`](https://rdrr.io/pkg/data.table/man/cbindlist.html)
+  and
+  [`mergelist()`](https://rdrr.io/pkg/data.table/man/mergelist.html),
+  which need a newer `data.table` than the package declares.
+
 ## dtlog 0.1.1
 
 - A logged function reached through another function that passes its own

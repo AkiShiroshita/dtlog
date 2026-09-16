@@ -23,7 +23,7 @@
 
     <a class="navbar-brand me-2" href="index.html">dtlog</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -235,6 +235,36 @@
 <td>the class it converted from and the resulting size</td>
 </tr>
 <tr>
+<td><code><a href="reference/foverlaps.html">foverlaps()</a></code></td>
+<td>the rows that went in and came out, and the columns the interval join added</td>
+</tr>
+<tr>
+<td>
+<code><a href="reference/grouping_sets.html">rollup()</a></code>, <code><a href="reference/grouping_sets.html">cube()</a></code>, <code><a href="reference/grouping_sets.html">groupingsets()</a></code>
+</td>
+<td>the size of the aggregate, once for the whole call rather than once per grouping set</td>
+</tr>
+<tr>
+<td><code><a href="https://rdrr.io/r/base/split.html" class="external-link">split()</a></code></td>
+<td>how many tables the rows went into, and how many rows each of them holds</td>
+</tr>
+<tr>
+<td><code><a href="reference/rows.html">fsetequal()</a></code></td>
+<td>whether the two tables hold the same rows</td>
+</tr>
+<tr>
+<td><code><a href="reference/set_functions.html">setnafill()</a></code></td>
+<td>how many <code>NA</code>s were filled, and how many are left</td>
+</tr>
+<tr>
+<td><code><a href="reference/set_functions.html">setdroplevels()</a></code></td>
+<td>which levels were dropped, and from which columns</td>
+</tr>
+<tr>
+<td><code><a href="reference/copy.html">copy()</a></code></td>
+<td>that a deep copy was made, and how big it is</td>
+</tr>
+<tr>
 <td><code>dttable(DT)</code></td>
 <td>one row per column: its name, how many unique values it has, and the values themselves</td>
 </tr>
@@ -411,7 +441,7 @@ left_join: added one column (label)
 <span><span class="co">#&gt; summarize: now 2 rows and 2 columns (was 32 rows and 12 columns, after filtering with i)</span></span></code></pre></div>
 </div>
 <div class="section level2">
-<h2 id="special-variables-and-shift">Special variables and shift()<a class="anchor" aria-label="anchor" href="#special-variables-and-shift"></a>
+<h2 id="special-variables">Special variables<a class="anchor" aria-label="anchor" href="#special-variables"></a>
 </h2>
 <p><code>.N</code>, <code>.SD</code>, <code>.SDcols</code> and <code>.GRP</code> are tools for writing <code>j</code>, so what dtlog reports is the result of the call around them:</p>
 <div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
@@ -423,12 +453,27 @@ left_join: added one column (label)
 <span></span>
 <span><span class="va">dt</span><span class="op">[</span>, <span class="va">lag_mpg</span> <span class="op">:=</span> <span class="fu"><a href="https://rdrr.io/pkg/data.table/man/shift.html" class="external-link">shift</a></span><span class="op">(</span><span class="va">mpg</span><span class="op">)</span><span class="op">]</span></span>
 <span><span class="co">#&gt; mutate: new variable 'lag_mpg' (double) with 25 unique values and 3% NA</span></span></code></pre></div>
-<p><code><a href="https://rdrr.io/pkg/data.table/man/shift.html" class="external-link">shift()</a></code> itself is not wrapped. It works on vectors and runs once per group, so wrapping it would print one message per group. The <code>:=</code> around it already tells you that a lag column appeared and how many <code>NA</code>s it has.</p>
+</div>
+<div class="section level2">
+<h2 id="what-is-not-logged">What is not logged<a class="anchor" aria-label="anchor" href="#what-is-not-logged"></a>
+</h2>
+<p>dtlog wraps the calls that take a table and hand back a different one, or change it by reference. Three kinds of <code>data.table</code> function are deliberately left alone.</p>
+<p><strong>Functions that work on a vector.</strong> <code><a href="https://rdrr.io/pkg/data.table/man/shift.html" class="external-link">shift()</a></code>, <code><a href="https://rdrr.io/pkg/data.table/man/nafill.html" class="external-link">nafill()</a></code>, <code><a href="https://rdrr.io/pkg/data.table/man/frank.html" class="external-link">frank()</a></code>, <code><a href="https://rdrr.io/pkg/data.table/man/frank.html" class="external-link">frankv()</a></code>, <code><a href="https://rdrr.io/pkg/data.table/man/rleid.html" class="external-link">rleid()</a></code>, <code><a href="https://rdrr.io/pkg/data.table/man/rowid.html" class="external-link">rowid()</a></code>, <code><a href="https://rdrr.io/pkg/data.table/man/fifelse.html" class="external-link">fifelse()</a></code>, <code><a href="https://rdrr.io/pkg/data.table/man/fcase.html" class="external-link">fcase()</a></code>, <code><a href="https://rdrr.io/pkg/data.table/man/between.html" class="external-link">between()</a></code>, <code><a href="https://rdrr.io/pkg/data.table/man/duplicated.html" class="external-link">uniqueN()</a></code>, <code><a href="https://rdrr.io/pkg/data.table/man/chmatch.html" class="external-link">chmatch()</a></code>, <code><a href="https://rdrr.io/pkg/data.table/man/tstrsplit.html" class="external-link">tstrsplit()</a></code> and <code><a href="https://rdrr.io/pkg/data.table/man/fdroplevels.html" class="external-link">fdroplevels()</a></code> are tools for writing <code>j</code>. They run once per group, so wrapping them would print one message per group, and the <code>:=</code> or the aggregation around them already says what came out:</p>
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">dt</span><span class="op">[</span>, <span class="va">lag_mpg</span> <span class="op">:=</span> <span class="fu"><a href="https://rdrr.io/pkg/data.table/man/shift.html" class="external-link">shift</a></span><span class="op">(</span><span class="va">mpg</span><span class="op">)</span><span class="op">]</span></span>
+<span><span class="co">#&gt; mutate: new variable 'lag_mpg' (double) with 25 unique values and 3% NA</span></span>
+<span></span>
+<span><span class="va">dt</span><span class="op">[</span>, <span class="va">r</span> <span class="op">:=</span> <span class="fu"><a href="https://rdrr.io/pkg/data.table/man/frank.html" class="external-link">frank</a></span><span class="op">(</span><span class="va">mpg</span><span class="op">)</span>, by <span class="op">=</span> <span class="va">cyl</span><span class="op">]</span></span>
+<span><span class="co">#&gt; mutate (by cyl): new variable 'r' (double) with 18 unique values and 0% NA</span></span></code></pre></div>
+<p><code><a href="reference/set_functions.html">setnafill()</a></code> and <code><a href="reference/set_functions.html">setdroplevels()</a></code> are wrapped although <code><a href="https://rdrr.io/pkg/data.table/man/nafill.html" class="external-link">nafill()</a></code> and <code><a href="https://rdrr.io/pkg/data.table/man/fdroplevels.html" class="external-link">fdroplevels()</a></code> are not: they change a whole table by reference, which is the kind of thing that is easy to miss.</p>
+<p><strong>Functions with no before and after.</strong> <code><a href="https://rdrr.io/pkg/data.table/man/data.table.html" class="external-link">data.table()</a></code>, <code><a href="https://rdrr.io/pkg/data.table/man/J.html" class="external-link">CJ()</a></code> and <code><a href="https://rdrr.io/pkg/data.table/man/J.html" class="external-link">SJ()</a></code> build a table rather than change one. <code><a href="https://rdrr.io/pkg/data.table/man/setkey.html" class="external-link">key()</a></code>, <code><a href="https://rdrr.io/pkg/data.table/man/setkey.html" class="external-link">indices()</a></code>, <code><a href="https://rdrr.io/pkg/data.table/man/setkey.html" class="external-link">haskey()</a></code>, <code><a href="https://rdrr.io/pkg/data.table/man/tables.html" class="external-link">tables()</a></code>, <code><a href="https://rdrr.io/pkg/data.table/man/address.html" class="external-link">address()</a></code> and <code><a href="https://rdrr.io/pkg/data.table/man/truelength.html" class="external-link">truelength()</a></code> report on one without touching it. <code><a href="https://rdrr.io/pkg/data.table/man/openmp-utils.html" class="external-link">setDTthreads()</a></code> and <code><a href="https://rdrr.io/pkg/data.table/man/setNumericRounding.html" class="external-link">setNumericRounding()</a></code> are settings. There is nothing to compare.</p>
+<p><strong><code><a href="https://rdrr.io/pkg/data.table/man/cbindlist.html" class="external-link">cbindlist()</a></code> and <code><a href="https://rdrr.io/pkg/data.table/man/mergelist.html" class="external-link">mergelist()</a></code></strong>, which arrived in <code>data.table</code> 1.18.0. dtlog declares <code>data.table (&gt;= 1.16.0)</code>, the oldest version that has every function it wraps, and wrapping these two would mean moving that floor forward by more than a year for the sake of two functions. They are worth logging, and will be wrapped when the floor rises on its own.</p>
+<p>A call that is not logged is otherwise untouched: it is <code>data.table</code>’s own function, and the operation around it reports as usual.</p>
 </div>
 <div class="section level2">
 <h2 id="citation">Citation<a class="anchor" aria-label="anchor" href="#citation"></a>
 </h2>
-<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/citation.html" class="external-link">citation</a></span><span class="op">(</span><span class="st">"dtlog"</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
@@ -476,6 +521,7 @@ left_join: added one column (label)
 <li><a href="https://CRAN.R-project.org/package=dtlog" class="external-link"><img src="https://www.r-pkg.org/badges/version/dtlog" alt="CRAN status"></a></li>
 <li><a href="https://app.codecov.io/gh/AkiShiroshita/dtlog?branch=main" class="external-link"><img src="https://codecov.io/gh/AkiShiroshita/dtlog/branch/main/graph/badge.svg" alt="Codecov test coverage"></a></li>
 <li><a href="https://CRAN.R-project.org/package=dtlog" class="external-link"><img src="https://cranlogs.r-pkg.org/badges/dtlog" alt="dtlog downloads"></a></li>
+<li><a href="https://doi.org/10.5281/zenodo.22781756" class="external-link"><img src="https://zenodo.org/badge/DOI/10.5281/zenodo.22781756.svg" alt="DOI"></a></li>
 </ul>
 </div>
 

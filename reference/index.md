@@ -16,6 +16,8 @@ message and then dispatches to the ‘data.table’ implementation.
   : Convert an object to a data table, with a log
 - [`merge(`*`<data.table>`*`)`](https://akishiroshita.github.io/dtlog/reference/merge.data.table.md)
   : Merge two data tables, with a log
+- [`foverlaps()`](https://akishiroshita.github.io/dtlog/reference/foverlaps.md)
+  : Join two data tables on overlapping intervals, with a log
 - [`melt()`](https://akishiroshita.github.io/dtlog/reference/reshape.md)
   [`dcast()`](https://akishiroshita.github.io/dtlog/reference/reshape.md)
   : Reshape a data table, with a log
@@ -26,7 +28,14 @@ message and then dispatches to the ‘data.table’ implementation.
   [`funion()`](https://akishiroshita.github.io/dtlog/reference/rows.md)
   [`fintersect()`](https://akishiroshita.github.io/dtlog/reference/rows.md)
   [`fsetdiff()`](https://akishiroshita.github.io/dtlog/reference/rows.md)
+  [`fsetequal()`](https://akishiroshita.github.io/dtlog/reference/rows.md)
   : Row operations with a log
+- [`rollup()`](https://akishiroshita.github.io/dtlog/reference/grouping_sets.md)
+  [`cube()`](https://akishiroshita.github.io/dtlog/reference/grouping_sets.md)
+  [`groupingsets()`](https://akishiroshita.github.io/dtlog/reference/grouping_sets.md)
+  : Aggregate over several grouping sets, with a log
+- [`split(`*`<data.table>`*`)`](https://akishiroshita.github.io/dtlog/reference/split.data.table.md)
+  : Split a data table, with a log
 - [`setnames()`](https://akishiroshita.github.io/dtlog/reference/set_functions.md)
   [`setcolorder()`](https://akishiroshita.github.io/dtlog/reference/set_functions.md)
   [`setkey()`](https://akishiroshita.github.io/dtlog/reference/set_functions.md)
@@ -39,10 +48,14 @@ message and then dispatches to the ‘data.table’ implementation.
   [`setDT()`](https://akishiroshita.github.io/dtlog/reference/set_functions.md)
   [`setDF()`](https://akishiroshita.github.io/dtlog/reference/set_functions.md)
   [`setattr()`](https://akishiroshita.github.io/dtlog/reference/set_functions.md)
+  [`setnafill()`](https://akishiroshita.github.io/dtlog/reference/set_functions.md)
+  [`setdroplevels()`](https://akishiroshita.github.io/dtlog/reference/set_functions.md)
   : Modify a data table by reference, with a log
 - [`head(`*`<data.table>`*`)`](https://akishiroshita.github.io/dtlog/reference/head_tail.md)
   [`tail(`*`<data.table>`*`)`](https://akishiroshita.github.io/dtlog/reference/head_tail.md)
   : First or last rows of a data table, with a log
+- [`copy()`](https://akishiroshita.github.io/dtlog/reference/copy.md) :
+  Copy a data table, with a log
 - [`fread()`](https://akishiroshita.github.io/dtlog/reference/fread.md)
   : Read a file into a data table, with a log
 - [`fwrite()`](https://akishiroshita.github.io/dtlog/reference/fwrite.md)

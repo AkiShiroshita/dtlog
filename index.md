@@ -121,6 +121,13 @@ conflict_prefer("setnames", "dtlog")
 | [`set()`](https://akishiroshita.github.io/dtlog/reference/set_functions.md), [`setDT()`](https://akishiroshita.github.io/dtlog/reference/set_functions.md), [`setDF()`](https://akishiroshita.github.io/dtlog/reference/set_functions.md), [`setattr()`](https://akishiroshita.github.io/dtlog/reference/set_functions.md) | what was changed by reference |
 | [`fread()`](https://akishiroshita.github.io/dtlog/reference/fread.md), [`fwrite()`](https://akishiroshita.github.io/dtlog/reference/fwrite.md) | rows, columns and the file name |
 | [`as.data.table()`](https://akishiroshita.github.io/dtlog/reference/as.data.table.md) | the class it converted from and the resulting size |
+| [`foverlaps()`](https://akishiroshita.github.io/dtlog/reference/foverlaps.md) | the rows that went in and came out, and the columns the interval join added |
+| [`rollup()`](https://akishiroshita.github.io/dtlog/reference/grouping_sets.md), [`cube()`](https://akishiroshita.github.io/dtlog/reference/grouping_sets.md), [`groupingsets()`](https://akishiroshita.github.io/dtlog/reference/grouping_sets.md) | the size of the aggregate, once for the whole call rather than once per grouping set |
+| [`split()`](https://rdrr.io/r/base/split.html) | how many tables the rows went into, and how many rows each of them holds |
+| [`fsetequal()`](https://akishiroshita.github.io/dtlog/reference/rows.md) | whether the two tables hold the same rows |
+| [`setnafill()`](https://akishiroshita.github.io/dtlog/reference/set_functions.md) | how many `NA`s were filled, and how many are left |
+| [`setdroplevels()`](https://akishiroshita.github.io/dtlog/reference/set_functions.md) | which levels were dropped, and from which columns |
+| [`copy()`](https://akishiroshita.github.io/dtlog/reference/copy.md) | that a deep copy was made, and how big it is |
 | `dttable(DT)` | one row per column: its name, how many unique values it has, and the values themselves |
 
 ## Describing the variables of a table
@@ -342,7 +349,7 @@ dt[mpg > 20, .N, by = cyl]
 #> summarize: now 2 rows and 2 columns (was 32 rows and 12 columns, after filtering with i)
 ```
 
-## Special variables and shift()
+## Special variables
 
 `.N`, `.SD`, `.SDcols` and `.GRP` are tools for writing `j`, so what
 dtlog reports is the result of the call around them:
@@ -359,10 +366,75 @@ dt[, lag_mpg := shift(mpg)]
 #> mutate: new variable 'lag_mpg' (double) with 25 unique values and 3% NA
 ```
 
-[`shift()`](https://rdrr.io/pkg/data.table/man/shift.html) itself is not
-wrapped. It works on vectors and runs once per group, so wrapping it
-would print one message per group. The `:=` around it already tells you
-that a lag column appeared and how many `NA`s it has.
+## What is not logged
+
+dtlog wraps the calls that take a table and hand back a different one,
+or change it by reference. Three kinds of `data.table` function are
+deliberately left alone.
+
+**Functions that work on a vector.**
+[`shift()`](https://rdrr.io/pkg/data.table/man/shift.html),
+[`nafill()`](https://rdrr.io/pkg/data.table/man/nafill.html),
+[`frank()`](https://rdrr.io/pkg/data.table/man/frank.html),
+[`frankv()`](https://rdrr.io/pkg/data.table/man/frank.html),
+[`rleid()`](https://rdrr.io/pkg/data.table/man/rleid.html),
+[`rowid()`](https://rdrr.io/pkg/data.table/man/rowid.html),
+[`fifelse()`](https://rdrr.io/pkg/data.table/man/fifelse.html),
+[`fcase()`](https://rdrr.io/pkg/data.table/man/fcase.html),
+[`between()`](https://rdrr.io/pkg/data.table/man/between.html),
+[`uniqueN()`](https://rdrr.io/pkg/data.table/man/duplicated.html),
+[`chmatch()`](https://rdrr.io/pkg/data.table/man/chmatch.html),
+[`tstrsplit()`](https://rdrr.io/pkg/data.table/man/tstrsplit.html) and
+[`fdroplevels()`](https://rdrr.io/pkg/data.table/man/fdroplevels.html)
+are tools for writing `j`. They run once per group, so wrapping them
+would print one message per group, and the `:=` or the aggregation
+around them already says what came out:
+
+``` r
+
+dt[, lag_mpg := shift(mpg)]
+#> mutate: new variable 'lag_mpg' (double) with 25 unique values and 3% NA
+
+dt[, r := frank(mpg), by = cyl]
+#> mutate (by cyl): new variable 'r' (double) with 18 unique values and 0% NA
+```
+
+[`setnafill()`](https://akishiroshita.github.io/dtlog/reference/set_functions.md)
+and
+[`setdroplevels()`](https://akishiroshita.github.io/dtlog/reference/set_functions.md)
+are wrapped although
+[`nafill()`](https://rdrr.io/pkg/data.table/man/nafill.html) and
+[`fdroplevels()`](https://rdrr.io/pkg/data.table/man/fdroplevels.html)
+are not: they change a whole table by reference, which is the kind of
+thing that is easy to miss.
+
+**Functions with no before and after.**
+[`data.table()`](https://rdrr.io/pkg/data.table/man/data.table.html),
+[`CJ()`](https://rdrr.io/pkg/data.table/man/J.html) and
+[`SJ()`](https://rdrr.io/pkg/data.table/man/J.html) build a table rather
+than change one.
+[`key()`](https://rdrr.io/pkg/data.table/man/setkey.html),
+[`indices()`](https://rdrr.io/pkg/data.table/man/setkey.html),
+[`haskey()`](https://rdrr.io/pkg/data.table/man/setkey.html),
+[`tables()`](https://rdrr.io/pkg/data.table/man/tables.html),
+[`address()`](https://rdrr.io/pkg/data.table/man/address.html) and
+[`truelength()`](https://rdrr.io/pkg/data.table/man/truelength.html)
+report on one without touching it.
+[`setDTthreads()`](https://rdrr.io/pkg/data.table/man/openmp-utils.html)
+and
+[`setNumericRounding()`](https://rdrr.io/pkg/data.table/man/setNumericRounding.html)
+are settings. There is nothing to compare.
+
+**[`cbindlist()`](https://rdrr.io/pkg/data.table/man/cbindlist.html) and
+[`mergelist()`](https://rdrr.io/pkg/data.table/man/mergelist.html)**,
+which arrived in `data.table` 1.18.0. dtlog declares
+`data.table (>= 1.16.0)`, the oldest version that has every function it
+wraps, and wrapping these two would mean moving that floor forward by
+more than a year for the sake of two functions. They are worth logging,
+and will be wrapped when the floor rises on its own.
+
+A call that is not logged is otherwise untouched: it is `data.table`’s
+own function, and the operation around it reports as usual.
 
 ## Citation
 

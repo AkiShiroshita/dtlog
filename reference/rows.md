@@ -22,6 +22,8 @@ funion(x, y, ...)
 fintersect(x, y, ...)
 
 fsetdiff(x, y, ...)
+
+fsetequal(x, y, ...)
 ```
 
 ## Arguments
