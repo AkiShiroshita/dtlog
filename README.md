@@ -374,10 +374,11 @@ build a table rather than change one. `key()`, `indices()`, `haskey()`,
 `setDTthreads()` and `setNumericRounding()` are settings. There is nothing to
 compare.
 
-**`cbindlist()` and `mergelist()`**, which arrived in `data.table` 1.17. dtlog
-declares `data.table (>= 1.14.0)`, and wrapping them would mean either raising
-that floor or shipping a wrapper for a function that may not be there. They are
-worth logging, and will be wrapped when the floor rises.
+**`cbindlist()` and `mergelist()`**, which arrived in `data.table` 1.18.0.
+dtlog declares `data.table (>= 1.16.0)`, the oldest version that has every
+function it wraps, and wrapping these two would mean moving that floor forward
+by more than a year for the sake of two functions. They are worth logging, and
+will be wrapped when the floor rises on its own.
 
 A call that is not logged is otherwise untouched: it is `data.table`'s own
 function, and the operation around it reports as usual.

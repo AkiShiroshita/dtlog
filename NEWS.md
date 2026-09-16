@@ -16,6 +16,12 @@
   `rollup()` produces one line rather than one `group_by` and one `summarize`
   per set. Logging that was already paused stays paused.
 
+* `Imports: data.table` moves from `>= 1.14.0` to `>= 1.16.0`. `setdroplevels()`
+  was introduced in 1.16.0, and a package should not export a wrapper for a
+  function its own dependency declaration says may not be there. Every other
+  function dtlog wraps is older than 1.16.0, so that is the oldest version the
+  package can honestly ask for.
+
 * The README says which `data.table` functions are deliberately not logged, and
   why: the ones that work on a vector inside `j` and would print once per group
   (`shift()`, `frank()`, `nafill()`, `fcase()` and the rest), the ones with no
