@@ -31,8 +31,11 @@
 ^revdep$
 ^CRAN-SUBMISSION$
 
-# Development notes and scratch output
+# The full licence text, for GitHub to read. CRAN gets the LICENSE file the
+# MIT template asks for, and --as-cran calls LICENSE.md a non-standard file.
 ^LICENSE\.md$
+
+# Development notes and scratch output
 ^cran-comments\.md$
 ^TODO\.md$
 ^figures$
