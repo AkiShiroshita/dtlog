@@ -8,15 +8,15 @@
 ## Citation
 
 Source:
-[`DESCRIPTION`](https://github.com/AkiShiroshita/dtlog/blob/main/DESCRIPTION)
+[`inst/CITATION`](https://github.com/AkiShiroshita/dtlog/blob/main/inst/CITATION)
 
 Shiroshita A (2026). *dtlog: Logging for 'data.table' Operations*. R
-package version 0.1.0, <https://github.com/AkiShiroshita/dtlog>.
+package version 0.1.0, <https://CRAN.R-project.org/package=dtlog>.
 
     @Manual{,
-      title = {dtlog: Logging for 'data.table' Operations},
+      title = {{dtlog}: Logging for 'data.table' Operations},
       author = {Akihiro Shiroshita},
       year = {2026},
       note = {R package version 0.1.0},
-      url = {https://github.com/AkiShiroshita/dtlog},
+      url = {https://CRAN.R-project.org/package=dtlog},
     }

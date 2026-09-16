@@ -62,6 +62,15 @@ setkey(dt, cyl)
 
 ## Installation
 
+From CRAN:
+
+``` r
+
+install.packages("dtlog")
+```
+
+The development version from GitHub:
+
 ``` r
 
 # install.packages("remotes")
@@ -354,6 +363,13 @@ dt[, lag_mpg := shift(mpg)]
 wrapped. It works on vectors and runs once per group, so wrapping it
 would print one message per group. The `:=` around it already tells you
 that a lag column appeared and how many `NA`s it has.
+
+## Citation
+
+``` r
+
+citation("dtlog")
+```
 
 ## License
 

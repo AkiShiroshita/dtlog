@@ -53,6 +53,8 @@
 <img src="logo.png" class="logo" alt=""><h1 id="dtlog-">dtlog <a class="anchor" aria-label="anchor" href="#dtlog-"></a>
 </h1>
 </div>
+<!-- badges: start -->
+
 <p><code>data.table</code> is fast and memory-efficient. It is particularly powerful for large datasets.</p>
 <p>However,<code>DT[i, j, by]</code> is terse. Reading a script rarely tells you how many rows a filter dropped, which columns a <code>:=</code> added, or whether a join matched anything.</p>
 <p><code>dtlog</code> prints that information. It is the same idea as <a href="https://github.com/elbersb/tidylog" class="external-link">tidylog</a>, applied to <code>data.table</code>. Nothing about the operations changes: dtlog only adds a message.</p>
@@ -105,7 +107,11 @@
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h2>
+<p>From CRAN:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"dtlog"</span><span class="op">)</span></span></code></pre></div>
+<p>The development version from GitHub:</p>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># install.packages("remotes")</span></span>
 <span><span class="fu">remotes</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">"AkiShiroshita/dtlog"</span><span class="op">)</span></span></code></pre></div>
 </div>
@@ -113,11 +119,11 @@
 <h2 id="load-order">Load order<a class="anchor" aria-label="anchor" href="#load-order"></a>
 </h2>
 <p>dtlog redefines functions that <code>data.table</code> exports, so it has to come last on the search path. Load it after <code>data.table</code>, or there will be no output.</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://r-datatable.com" class="external-link">data.table</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/AkiShiroshita/dtlog" class="external-link">dtlog</a></span><span class="op">)</span>      <span class="co"># last</span></span></code></pre></div>
 <p>If you would rather resolve the conflicts explicitly, use the <a href="https://github.com/r-lib/conflicted" class="external-link">conflicted</a> package:</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://conflicted.r-lib.org/" class="external-link">conflicted</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://r-datatable.com" class="external-link">data.table</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/AkiShiroshita/dtlog" class="external-link">dtlog</a></span><span class="op">)</span></span>
@@ -239,7 +245,7 @@
 <h2 id="describing-the-variables-of-a-table">Describing the variables of a table<a class="anchor" aria-label="anchor" href="#describing-the-variables-of-a-table"></a>
 </h2>
 <p><code><a href="reference/dttable.html">dttable()</a></code> describes a <code>data.table</code> rather than cross tabulating it. Each column becomes one row – its name, how many unique values it holds, and the values themselves – and the description is returned as a <code>data.table</code> so it can be kept, written out or printed again. It is a function of its own: <code>dtlog</code> does not mask <code><a href="https://rdrr.io/r/base/table.html" class="external-link">base::table()</a></code>, and <code><a href="https://rdrr.io/r/base/table.html" class="external-link">table()</a></code> keeps working exactly as it did.</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="reference/dttable.html">dttable</a></span><span class="op">(</span><span class="va">dt</span><span class="op">)</span></span>
 <span><span class="co">#&gt; dttable: 32 rows and 12 columns</span></span>
 <span><span class="co">#&gt;         Variable N_unique                            Unique_value</span></span>
@@ -256,7 +262,7 @@
 <span><span class="co">#&gt;             gear        3                                 3; 4; 5</span></span>
 <span><span class="co">#&gt;             carb        6                        1; 2; 3; 4; 6; 8</span></span></code></pre></div>
 <p>The values are listed in the order the column sorts in: numbers ascending, characters alphabetically, dates and times chronologically, factors by their levels. A column with 20 or more unique values is reported as possibly continuous rather than listed, and a list of values longer than 80 characters is truncated. Missing values are listed and counted like any other value: <code>NA</code> (including <code>NA</code> as a level of a factor) appears as <code>Missing</code>, <code>NaN</code> as <code>NaN</code>, and both are counted in <code>N_unique</code>; an empty string is a value of its own, not a missing one.</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="reference/dttable.html">dttable</a></span><span class="op">(</span><span class="va">dat</span><span class="op">)</span></span>
 <span><span class="co">#&gt; dttable: 4 rows and 4 columns</span></span>
 <span><span class="co">#&gt;         Variable N_unique                    Unique_value</span></span>
@@ -266,7 +272,7 @@
 <span><span class="co">#&gt;             date        3 2020-01-01; 2020-01-02; Missing</span></span></code></pre></div>
 <p>The description goes through the same output as every other message, so <code><a href="reference/dt_log.html">dt_log()</a></code> records it as well.</p>
 <p>Only a single <code>data.table</code> triggers the description. Every other call is passed straight on to <code><a href="https://rdrr.io/r/base/table.html" class="external-link">base::table()</a></code>, so <code><a href="reference/dttable.html">dttable()</a></code> can stand in for <code><a href="https://rdrr.io/r/base/table.html" class="external-link">table()</a></code> anywhere:</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="reference/dttable.html">dttable</a></span><span class="op">(</span><span class="va">dt</span><span class="op">$</span><span class="va">cyl</span>, <span class="va">dt</span><span class="op">$</span><span class="va">gear</span><span class="op">)</span>       <span class="co"># the contingency table, as always</span></span>
 <span><span class="fu"><a href="reference/dttable.html">dttable</a></span><span class="op">(</span><span class="va">df</span><span class="op">$</span><span class="va">sex</span>, <span class="va">df</span><span class="op">$</span><span class="va">death</span><span class="op">)</span>      <span class="co"># a data.frame column is not a data.table either</span></span>
 <span><span class="fu"><a href="reference/dttable.html">dttable</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="va">dt</span><span class="op">)</span><span class="op">)</span>     <span class="co"># and this is still base's cross tabulation</span></span></code></pre></div>
@@ -275,7 +281,7 @@
 <h2 id="pipes">Pipes<a class="anchor" aria-label="anchor" href="#pipes"></a>
 </h2>
 <p>A <code>data.table</code> chain written with the native pipe logs the same way a nested one does. <code>|&gt;</code> is a syntax transformation, so <code>x |&gt; f(y)</code> reaches dtlog as an ordinary call to <code>f(x, y)</code>.</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">prostate2</span><span class="op">[</span><span class="va">rx</span> <span class="op">==</span> <span class="st">"0.2 mg estrogen"</span><span class="op">]</span> <span class="op">|&gt;</span></span>
 <span>  <span class="va">_</span><span class="op">[</span>, <span class="fu">.</span><span class="op">(</span>mean_age <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">age</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>,</span>
 <span>        mean_wt  <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">wt</span>,  na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span>,</span>
@@ -284,7 +290,7 @@
 <span><span class="co">#&gt; group_by: one grouping variable (rx)</span></span>
 <span><span class="co">#&gt; summarize: now one row and 3 columns (was 5 rows and 3 columns)</span></span></code></pre></div>
 <p>The <code>_</code> placeholder on the left of <code>[</code> needs R &gt;= 4.3.0; <code>|&gt;</code> itself needs R &gt;= 4.1.0. Everything dtlog wraps works in a pipe, including the <code>set*()</code> functions, which still change their input by reference:</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">DT</span> <span class="op">|&gt;</span> <span class="va">_</span><span class="op">[</span><span class="va">mpg</span> <span class="op">&gt;</span> <span class="fl">20</span><span class="op">]</span> <span class="op">|&gt;</span> <span class="fu"><a href="reference/set_functions.html">setorder</a></span><span class="op">(</span><span class="va">cyl</span><span class="op">)</span></span>
 <span><span class="co">#&gt; filter: removed 18 rows (56%), 14 rows remaining</span></span>
 <span><span class="co">#&gt; arrange: sorted 14 rows by (cyl)</span></span></code></pre></div>
@@ -293,7 +299,7 @@
 <div class="section level2">
 <h2 id="options">Options<a class="anchor" aria-label="anchor" href="#options"></a>
 </h2>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># where the output goes (message() by default)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/options.html" class="external-link">options</a></span><span class="op">(</span>dtlog.display <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="va">message</span>, <span class="va">log4r_info</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
@@ -310,7 +316,7 @@
 <span><span class="co"># also log data.table calls made inside other packages (FALSE by default)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/options.html" class="external-link">options</a></span><span class="op">(</span>dtlog.log_from_packages <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
 <p><code>dtlog_summary(DT)</code> summarises a table and returns it unchanged, so you can drop it into a chain:</p>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="reference/dtlog_summary.html">dtlog_summary</a></span><span class="op">(</span><span class="va">dt</span><span class="op">)</span></span>
 <span><span class="co">#&gt; dtlog: data.table with 32 rows and 12 columns</span></span></code></pre></div>
 </div>
@@ -318,7 +324,7 @@
 <h2 id="writing-the-session-to-a-file">Writing the session to a file<a class="anchor" aria-label="anchor" href="#writing-the-session-to-a-file"></a>
 </h2>
 <p><code><a href="reference/dt_log.html">dt_log()</a></code> opens a transcript and <code><a href="reference/dt_log.html">dt_log_end()</a></code> closes it. Between the two, every operation is appended to a text file together with the call that produced it. Nothing is written before the first call or after the second.</p>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="reference/dt_log.html">dt_log</a></span><span class="op">(</span><span class="st">"session.txt"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">dt</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/as.data.table.html">as.data.table</a></span><span class="op">(</span><span class="va">mtcars</span>, keep.rownames <span class="op">=</span> <span class="st">"car"</span><span class="op">)</span></span>
@@ -387,7 +393,7 @@ left_join: added one column (label)
 <h2 id="when-i-and-j-do-different-things">When i and j do different things<a class="anchor" aria-label="anchor" href="#when-i-and-j-do-different-things"></a>
 </h2>
 <p>The number of rows in the result of <code>DT[i, j]</code> is not always the number of rows <code>i</code> selected. Without <code>by=</code>, an aggregating <code>j</code> collapses the result into a single row, so a result that is longer than that was shaped by <code>i</code> and the two are reported one after the other. Where a filter and an aggregation do meet, the row count is not blamed on <code>i</code>.</p>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">dt</span><span class="op">[</span><span class="va">mpg</span> <span class="op">&gt;</span> <span class="fl">20</span>, <span class="fu">.</span><span class="op">(</span><span class="va">car</span>, <span class="va">mpg</span><span class="op">)</span><span class="op">]</span>        <span class="co"># j selects columns, so the rows come from i</span></span>
 <span><span class="co">#&gt; filter: removed 18 rows (56%), 14 rows remaining</span></span>
 <span><span class="co">#&gt; select: dropped 10 variables (cyl, disp, hp, drat, wt, …)</span></span>
@@ -408,7 +414,7 @@ left_join: added one column (label)
 <h2 id="special-variables-and-shift">Special variables and shift()<a class="anchor" aria-label="anchor" href="#special-variables-and-shift"></a>
 </h2>
 <p><code>.N</code>, <code>.SD</code>, <code>.SDcols</code> and <code>.GRP</code> are tools for writing <code>j</code>, so what dtlog reports is the result of the call around them:</p>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">dt</span><span class="op">[</span>, <span class="va">n</span> <span class="op">:=</span> <span class="va">.N</span>, by <span class="op">=</span> <span class="va">cyl</span><span class="op">]</span></span>
 <span><span class="co">#&gt; mutate (by cyl): new variable 'n' (integer) with 3 unique values and 0% NA</span></span>
 <span></span>
@@ -418,6 +424,12 @@ left_join: added one column (label)
 <span><span class="va">dt</span><span class="op">[</span>, <span class="va">lag_mpg</span> <span class="op">:=</span> <span class="fu"><a href="https://rdrr.io/pkg/data.table/man/shift.html" class="external-link">shift</a></span><span class="op">(</span><span class="va">mpg</span><span class="op">)</span><span class="op">]</span></span>
 <span><span class="co">#&gt; mutate: new variable 'lag_mpg' (double) with 25 unique values and 3% NA</span></span></code></pre></div>
 <p><code><a href="https://rdrr.io/pkg/data.table/man/shift.html" class="external-link">shift()</a></code> itself is not wrapped. It works on vectors and runs once per group, so wrapping it would print one message per group. The <code>:=</code> around it already tells you that a lag column appeared and how many <code>NA</code>s it has.</p>
+</div>
+<div class="section level2">
+<h2 id="citation">Citation<a class="anchor" aria-label="anchor" href="#citation"></a>
+</h2>
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/citation.html" class="external-link">citation</a></span><span class="op">(</span><span class="st">"dtlog"</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="license">License<a class="anchor" aria-label="anchor" href="#license"></a>
@@ -458,7 +470,15 @@ left_join: added one column (label)
 </ul>
 </div>
 
-
+<div class="dev-status">
+<h2 data-toc-skip>Dev status</h2>
+<ul class="list-unstyled">
+<li><a href="https://github.com/AkiShiroshita/dtlog/actions/workflows/R-CMD-check.yaml" class="external-link"><img src="https://github.com/AkiShiroshita/dtlog/actions/workflows/R-CMD-check.yaml/badge.svg" alt="R-CMD-check"></a></li>
+<li><a href="https://CRAN.R-project.org/package=dtlog" class="external-link"><img src="https://www.r-pkg.org/badges/version/dtlog" alt="CRAN status"></a></li>
+<li><a href="https://app.codecov.io/gh/AkiShiroshita/dtlog?branch=main" class="external-link"><img src="https://codecov.io/gh/AkiShiroshita/dtlog/branch/main/graph/badge.svg" alt="Codecov test coverage"></a></li>
+<li><a href="https://CRAN.R-project.org/package=dtlog" class="external-link"><img src="https://cranlogs.r-pkg.org/badges/dtlog" alt="dtlog downloads"></a></li>
+</ul>
+</div>
 
   </aside>
 </div>
