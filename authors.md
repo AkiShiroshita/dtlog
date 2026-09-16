@@ -8,7 +8,7 @@
 ## Citation
 
 Source:
-[`inst/CITATION`](https://github.com/AkiShiroshita/dtlog/blob/main/inst/CITATION)
+[`inst/CITATION`](https://github.com/AkiShiroshita/dtlog/blob/v0.1.1/inst/CITATION)
 
 Shiroshita A (2026). *dtlog: Logging for 'data.table' Operations*. R
 package version 0.1.1, <https://CRAN.R-project.org/package=dtlog>.
