@@ -9,6 +9,7 @@
 \alias{funion}
 \alias{fintersect}
 \alias{fsetdiff}
+\alias{fsetequal}
 \title{Row operations with a log}
 \usage{
 \method{unique}{data.table}(x, ...)
@@ -24,6 +25,8 @@ funion(x, y, ...)
 fintersect(x, y, ...)
 
 fsetdiff(x, y, ...)
+
+fsetequal(x, y, ...)
 }
 \arguments{
 \item{x, y, object, l}{The inputs, as in the corresponding \code{data.table}

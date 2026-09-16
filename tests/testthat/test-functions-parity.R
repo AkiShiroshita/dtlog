@@ -45,7 +45,26 @@ function_expressions <- as.list(quote(list(
   set(data.table::copy(DT), j = "gear", value = NULL),
   setDT(as.data.frame(OTHER)),
   setDF(data.table::copy(OTHER)),
-  setattr(data.table::copy(OTHER), "myattr", "value")
+  setattr(data.table::copy(OTHER), "myattr", "value"),
+  setnafill(data.table::copy(NAFILL), type = "const", fill = 0),
+  setnafill(data.table::copy(NAFILL), type = "locf"),
+  setnafill(data.table::copy(NAFILL), type = "const", fill = 0, cols = "a"),
+  setdroplevels(data.table::copy(FACTORS)),
+  setdroplevels(data.table::copy(FACTORS), except = 1L),
+  foverlaps(SPAN, WINDOW),
+  foverlaps(SPAN, WINDOW, type = "within"),
+  foverlaps(SPAN, WINDOW, which = TRUE),
+  foverlaps(SPAN, WINDOW, which = TRUE, mult = "first"),
+  rollup(GROUPS, j = sum(v), by = c("g", "h")),
+  cube(GROUPS, j = sum(v), by = c("g", "h")),
+  groupingsets(GROUPS, j = sum(v), by = c("g", "h"), sets = list("g", "h")),
+  fsetequal(OTHER, OTHER),
+  fsetequal(OTHER, HALF),
+  split(GROUPS, by = "g"),
+  split(GROUPS, by = c("g", "h")),
+  split(GROUPS, by = c("g", "h"), flatten = FALSE),
+  copy(DT),
+  copy(1:5)
 )))[-1L]
 
 test_that("the wrapped functions return what data.table returns", {

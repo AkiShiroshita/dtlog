@@ -120,6 +120,13 @@ conflict_prefer("setnames", "dtlog")
 | `set()`, `setDT()`, `setDF()`, `setattr()`                                            | what was changed by reference                                                                                           |
 | `fread()`, `fwrite()`                                                                     | rows, columns and the file name                                                                                         |
 | `as.data.table()`                                                                           | the class it converted from and the resulting size                                                                      |
+| `foverlaps()`                                                                                | the rows that went in and came out, and the columns the interval join added                                             |
+| `rollup()`, `cube()`, `groupingsets()`                                                      | the size of the aggregate, once for the whole call rather than once per grouping set                                    |
+| `split()`                                                                                   | how many tables the rows went into, and how many rows each of them holds                                                |
+| `fsetequal()`                                                                               | whether the two tables hold the same rows                                                                               |
+| `setnafill()`                                                                               | how many `NA`s were filled, and how many are left                                                                       |
+| `setdroplevels()`                                                                           | which levels were dropped, and from which columns                                                                       |
+| `copy()`                                                                                    | that a deep copy was made, and how big it is                                                                            |
 | `dttable(DT)`                                                                                  | one row per column: its name, how many unique values it has, and the values themselves                                  |
 
 ## Describing the variables of a table
@@ -321,7 +328,7 @@ dt[mpg > 20, .N, by = cyl]
 #> summarize: now 2 rows and 2 columns (was 32 rows and 12 columns, after filtering with i)
 ```
 
-## Special variables and shift()
+## Special variables
 
 `.N`, `.SD`, `.SDcols` and `.GRP` are tools for writing `j`, so what dtlog
 reports is the result of the call around them:
@@ -336,9 +343,44 @@ dt[, grp := .GRP, by = cyl]
 dt[, lag_mpg := shift(mpg)]
 #> mutate: new variable 'lag_mpg' (double) with 25 unique values and 3% NA
 ```
-`shift()` itself is not wrapped. It works on vectors and runs once per group, so
-wrapping it would print one message per group. The `:=` around it already tells
-you that a lag column appeared and how many `NA`s it has.
+## What is not logged
+
+dtlog wraps the calls that take a table and hand back a different one, or
+change it by reference. Three kinds of `data.table` function are deliberately
+left alone.
+
+**Functions that work on a vector.** `shift()`, `nafill()`, `frank()`,
+`frankv()`, `rleid()`, `rowid()`, `fifelse()`, `fcase()`, `between()`,
+`uniqueN()`, `chmatch()`, `tstrsplit()` and `fdroplevels()` are tools for
+writing `j`. They run once per group, so wrapping them would print one message
+per group, and the `:=` or the aggregation around them already says what came
+out:
+
+```r
+dt[, lag_mpg := shift(mpg)]
+#> mutate: new variable 'lag_mpg' (double) with 25 unique values and 3% NA
+
+dt[, r := frank(mpg), by = cyl]
+#> mutate (by cyl): new variable 'r' (double) with 18 unique values and 0% NA
+```
+
+`setnafill()` and `setdroplevels()` are wrapped although `nafill()` and
+`fdroplevels()` are not: they change a whole table by reference, which is the
+kind of thing that is easy to miss.
+
+**Functions with no before and after.** `data.table()`, `CJ()` and `SJ()`
+build a table rather than change one. `key()`, `indices()`, `haskey()`,
+`tables()`, `address()` and `truelength()` report on one without touching it.
+`setDTthreads()` and `setNumericRounding()` are settings. There is nothing to
+compare.
+
+**`cbindlist()` and `mergelist()`**, which arrived in `data.table` 1.17. dtlog
+declares `data.table (>= 1.14.0)`, and wrapping them would mean either raising
+that floor or shipping a wrapper for a function that may not be there. They are
+worth logging, and will be wrapped when the floor rises.
+
+A call that is not logged is otherwise untouched: it is `data.table`'s own
+function, and the operation around it reports as usual.
 
 ## Citation
 

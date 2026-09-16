@@ -320,3 +320,97 @@ log_setattr <- function(out, before, cl, pf) {
   }
   display(sprintf("setattr: %s attribute%s by reference", verb, label))
 }
+
+#' @rdname set_functions
+#' @rawNamespace export("setnafill")
+setnafill <- function(x, ...) {
+  nafill_logged(sys.call(), parent.frame())
+}
+
+# The count of NAs before the call is the message, so it is taken whatever the
+# detail level says: without it there is nothing to report. It is one pass over
+# the columns and it materialises numbers, not references, so the fill that
+# follows cannot change it underneath.
+nafill_logged <- function(cl, pf) {
+  if (!should_log_call(pf)) return(run_wrapped("setnafill", cl, pf))
+  written_call <- cl
+  resolved <- try_log(resolve_all(cl, dt_formals("setnafill"), "x", pf))
+  if (!is.list(resolved)) resolved <- nothing_resolved(cl, "x")
+  target <- resolved$values[["x"]]
+  before <- list(x = try_log(snap(target)), na = try_log(na_counts(target)))
+  before$.call <- written_call
+  run_wrapped("setnafill", resolved$cl, pf, before, log_setnafill,
+              bindings = resolved$bindings)
+}
+
+na_counts <- function(x) {
+  if (!is.data.frame(x)) return(NULL)
+  vapply(x, n_na, integer(1L))
+}
+
+log_setnafill <- function(out, before, cl, pf) {
+  x <- before$x
+  if (is.null(x) || is.null(before$na)) return(invisible(NULL))
+  after <- try_log(na_counts(x$obj))
+  if (is.null(after) || length(after) != length(before$na)) return(invisible(NULL))
+  filled <- before$na - after
+  changed <- names(before$na)[filled > 0L]
+  total <- sum(filled)
+  left <- sum(after)
+  if (total <= 0L) return(display("setnafill: no NAs to fill"))
+  display(sprintf(
+    "setnafill: filled %s in %s (%s)%s",
+    plural(total, "NA"), plural(length(changed), "column"), format_list(changed),
+    if (left > 0L) sprintf(", %s remaining", plural(left, "NA")) else ""
+  ))
+}
+
+#' @rdname set_functions
+#' @rawNamespace export("setdroplevels")
+setdroplevels <- function(x, ...) {
+  droplevels_logged(sys.call(), parent.frame())
+}
+
+droplevels_logged <- function(cl, pf) {
+  if (!should_log_call(pf)) return(run_wrapped("setdroplevels", cl, pf))
+  written_call <- cl
+  resolved <- try_log(resolve_all(cl, dt_formals("setdroplevels"), "x", pf))
+  if (!is.list(resolved)) resolved <- nothing_resolved(cl, "x")
+  target <- resolved$values[["x"]]
+  before <- list(x = try_log(snap(target)),
+                 levels = try_log(factor_levels(target)))
+  before$.call <- written_call
+  run_wrapped("setdroplevels", resolved$cl, pf, before, log_setdroplevels,
+              bindings = resolved$bindings)
+}
+
+# The levels are copied for the same reason setattr() copies the attribute it
+# is about to overwrite: setdroplevels() writes by reference, and a level set
+# read off the column is the very vector it replaces.
+factor_levels <- function(x) {
+  if (!is.data.frame(x)) return(NULL)
+  nms <- names(x)[vapply(x, is.factor, logical(1L))]
+  stats::setNames(
+    lapply(nms, function(nm) data.table::copy(levels(x[[nm]]))), nms
+  )
+}
+
+log_setdroplevels <- function(out, before, cl, pf) {
+  x <- before$x
+  old <- before$levels
+  if (is.null(x) || !is.list(old)) return(invisible(NULL))
+  after <- try_log(factor_levels(x$obj))
+  if (!is.list(after)) return(invisible(NULL))
+  dropped <- stats::setNames(
+    lapply(names(old), function(nm) setdiff(old[[nm]], after[[nm]])), names(old)
+  )
+  dropped <- dropped[lengths(dropped) > 0L]
+  if (!length(dropped)) return(display("setdroplevels: no levels dropped"))
+  labels <- sprintf("%s: %s", names(dropped),
+                    vapply(dropped, format_list, character(1L)))
+  display(sprintf(
+    "setdroplevels: dropped %s from %s (%s)",
+    plural(sum(lengths(dropped)), "level"),
+    plural(length(dropped), "column"), format_list(labels)
+  ))
+}

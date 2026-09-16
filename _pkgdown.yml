@@ -16,10 +16,14 @@ reference:
     contents:
       - as.data.table
       - merge.data.table
+      - foverlaps
       - reshape
       - rows
+      - grouping_sets
+      - split.data.table
       - set_functions
       - head_tail
+      - copy
       - fread
       - fwrite
   - title: Describing a table
