@@ -50,6 +50,38 @@ test_that(":= produces mutate messages", {
   expect_match(msgs[2L], "^ {8}new variable 'two'")
 })
 
+test_that(":= names the column type a factor or a list column was given", {
+  env <- fresh_env()
+  expect_dtlog_message(
+    quote(DT[, grade := factor(ifelse(mpg > 20, "high", "low"))]),
+    "mutate: new variable 'grade' \\(factor\\) with 2 unique values and 0% NA",
+    env)
+  # an ordered factor is a factor, and has to be recognised before one
+  expect_dtlog_message(
+    quote(DT[, rank := ordered(cyl, levels = c(4, 6, 8))]),
+    "mutate: new variable 'rank' \\(ordered factor\\) with 3 unique values",
+    env)
+  # uniqueN() means nothing for a column whose cells are vectors, and is.na()
+  # on one is elementwise, so neither number is claimed for a list column
+  expect_dtlog_message(quote(DT[, parts := .(list(1:2))]),
+                       "mutate: new variable 'parts' \\(list\\) with 0% NA", env)
+  # a factor is compared as character: `!=` on two factors would warn about
+  # their level sets, and dtlog's own comparison must not warn at the caller.
+  # loud() keeps the log running while sending its output to a collector, so a
+  # warning raised on the way to the message is the only thing left to escape.
+  expect_dtlog_message(quote(DT[1L, grade := "low"]),
+                       "mutate: changed one value \\(3%\\) of 'grade'", env)
+  expect_silent(loud(eval(quote(DT[2L, grade := "low"]), env)))
+})
+
+test_that("a single NA gained or recovered is reported in the singular", {
+  env <- fresh_env()
+  expect_dtlog_message(quote(WITH_NA[1L, a := NA]),
+                       "changed one value \\(33%\\) of 'a' \\(one new NA\\)", env)
+  expect_dtlog_message(quote(WITH_NA[2L, a := 2]),
+                       "changed one value \\(33%\\) of 'a' \\(one fewer NA\\)", env)
+})
+
 test_that("an aggregating j is not reported as a filter", {
   # the row count of the result says nothing about how many rows i selected
   expect_identical(

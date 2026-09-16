@@ -47,5 +47,7 @@ export(dtlog_resume)
 export(dtlog_summary)
 export(dttable)
 importFrom(stats,na.omit)
-importFrom(utils,head)
-importFrom(utils,tail)
+importFrom(utils,
+  head,
+  tail
+)
