@@ -1,3 +1,5 @@
+# dtlog (development version)
+
 # dtlog 0.2.0
 
 * Nine more `data.table` functions are logged. `foverlaps()` reports the rows
