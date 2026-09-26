@@ -8,7 +8,7 @@
 ## Citation
 
 Source:
-[`inst/CITATION`](https://github.com/AkiShiroshita/dtlog/blob/main/inst/CITATION)
+[`inst/CITATION`](https://github.com/AkiShiroshita/dtlog/blob/v0.2.0/inst/CITATION)
 
 Shiroshita A (2026). *dtlog: Logging for 'data.table' Operations*.
 [doi:10.5281/zenodo.22781756](https://doi.org/10.5281/zenodo.22781756).

@@ -2,6 +2,8 @@
 
 ## dtlog 0.2.0
 
+CRAN release: 2026-09-25
+
 - Nine more `data.table` functions are logged.
   [`foverlaps()`](https://akishiroshita.github.io/dtlog/reference/foverlaps.md)
   reports the rows that went into the interval join and the rows and
