@@ -1,129 +1,64 @@
-## Resubmission
+## Update submission
 
-This is a resubmission of the first submission of 'dtlog' (version 0.1.0).
+This is an update of 'dtlog' from 0.1.0 (on CRAN since 2026-09-15) to 0.2.0.
 
-The reviewer wrote:
+I am sending it sooner than I otherwise would because it fixes a bug in 0.1.0
+that users hit in ordinary code: a logged function called through another
+function that forwards its own `...` -- `rbindlist(lapply(files, fread))` is
+the common case -- failed with "the ... list contains fewer than 1 element".
+It is fixed, and `tests/testthat/` has a regression test for it.
 
-> Please ensure that your functions do not write by default or in your
-> examples/vignettes/tests in the user's home filespace (including the package
-> directory and getwd()). This is not allowed by CRAN policies. Please omit any
-> default path in writing functions. In your examples/vignettes/tests you can
-> write to tempdir().
+The release also:
 
-`dt_log()`, the one function in the package that creates a file, had
-`file = "dtlog.txt"` as its default and so would have written to `getwd()` when
-called without a path. That default is gone: `file` is now a required argument,
-and `dt_log()` called without one stops with
+* logs nine more functions exported by 'data.table' (`foverlaps()`,
+  `rollup()`, `cube()`, `groupingsets()`, `split()`, `fsetequal()`,
+  `setnafill()`, `setdroplevels()` and `copy()`);
+* raises `Imports: data.table` from `>= 1.14.0` to `>= 1.16.0`, because
+  `setdroplevels()` first appeared in 'data.table' 1.16.0;
+* adds a CITATION file with the package's Zenodo DOI.
 
-```
-Error: dt_log(): `file` must be a single path; there is no default
-```
-
-The documentation of the argument says so, and
-`tests/testthat/test-transcript.R` checks both the error and that no
-`dtlog.txt` is left behind.
-
-No other function in the package writes a file of its own. `fwrite()` is a
-logging wrapper around `data.table::fwrite()`, which has no default path
-either, and the transcript is only ever written to the path the user passes to
-`dt_log()`.
-
-Every example, the vignette and the whole test suite already wrote to
-`tempfile()` only, and they still do. I re-checked the sources for a written
-path outside `tempdir()` and found none.
-
-## Submission
-
-This is the first submission of 'dtlog' (version 0.1.0).
+The full list is in NEWS.md.
 
 ## Test environments
 
-Every environment below was re-checked on 2026-09-05, on the source of this
-resubmission.
-
-* win-builder, R release 4.6.1 (2026-06-24 ucrt), Windows Server 2022 x64
-  (build 20348), x86_64-w64-mingw32 -- Status: 1 NOTE (2026-09-05).
-
-* win-builder, R Under development (unstable) (2026-09-04 r90492 ucrt),
-  Windows Server 2022 x64 (build 20348), x86_64-w64-mingw32 -- Status: 1 NOTE
-  (2026-09-05).
-
-* GitHub Actions, `R CMD check --as-cran` (2026-09-05) -- Status: OK on each
-  of:
-
-  * Ubuntu 24.04.4 LTS, x86_64-pc-linux-gnu, R-devel (2026-09-04 r90492)
-  * Ubuntu 24.04.4 LTS, x86_64-pc-linux-gnu, R 4.6.1 (2026-06-24)
-  * Ubuntu 24.04.4 LTS, x86_64-pc-linux-gnu, R 4.5.3 (2026-03-11), oldrel-1
-  * macOS Tahoe 26.6.2, aarch64-apple-darwin23, R 4.6.1 (2026-06-24)
-  * Windows Server 2022 x64 (build 26100), x86_64-w64-mingw32,
-    R 4.6.1 (2026-06-24 ucrt)
-
-* R-hub v2, `R CMD check` (2026-09-05) -- Status: OK on each of:
-
-  * macOS Sequoia 15.7.9, x86_64-apple-darwin20,
-    R-devel (2026-09-04 r90492)
-  * Ubuntu 22.04.5 LTS, x86_64-pc-linux-gnu, R-devel (2026-09-04 r90492),
-    built without long doubles ('nold')
-  * Fedora Linux 42, x86_64-pc-linux-gnu, R-devel (2026-06-21 r90185), with
-    the suggested packages made unavailable ('nosuggests')
-
-* Local, `R CMD check --as-cran` (2026-09-05) -- Status: 1 NOTE.
+* Local, `R CMD check --as-cran` (2026-09-25):
   Windows 11 x64 (build 26200), x86_64-w64-mingw32,
   R 4.6.0 (2026-04-24 ucrt).
 
+* win-builder, R release 4.6.1 (2026-06-24 ucrt), Windows Server 2022 x64
+  (build 20348), x86_64-w64-mingw32 (2026-09-25).
+
+* win-builder, R Under development (unstable) (2026-09-21 r90579 ucrt),
+  Windows Server 2022 x64 (build 20348), x86_64-w64-mingw32 (2026-09-25).
+
+* GitHub Actions, `R CMD check --as-cran` on the submitted source
+  (2026-09-16):
+
+  * Ubuntu 24.04.5 LTS, R-devel
+  * Ubuntu 24.04.5 LTS, R 4.6.1 (2026-06-24)
+  * Ubuntu 24.04.5 LTS, R 4.5.3 (2026-03-11), oldrel-1
+  * macOS Tahoe 26.6.2, R 4.6.1 (2026-06-24)
+  * Windows Server 2022 x64 (build 26100), R 4.6.1 (2026-06-24 ucrt)
+
 ## R CMD check results
 
-Every GitHub Actions and R-hub platform above reports Status: OK -- 0 errors,
-0 warnings, 0 notes. Both win-builder runs (R-release and R-devel) and the
-local run report 0 errors | 0 warnings | 1 note.
+0 errors | 0 warnings | 0 notes
 
-The note is the expected one for a package not yet on CRAN:
-
-```
-* checking CRAN incoming feasibility ... NOTE
-Maintainer: 'Akihiro Shiroshita <akihirokun8@gmail.com>'
-
-New submission
-```
-
-The words 'dtlog' and 'tidylog' in the DESCRIPTION are package names and are
-quoted as required. `dttable()` and `base::table()` in the Description field
-are function names, so they are not quoted.
-
-`R CMD check` reports OK for every other check on every platform above,
-including the examples, the vignette, the PDF and HTML versions of the manual,
-and the test suite (testthat edition 3, 909 expectations across 10 files, none
-failing).
+on every environment above.
 
 ## Notes for the reviewer
 
-'dtlog' intentionally provides wrappers around functions exported by
-'data.table' (for example `[.data.table`, `merge.data.table`, `setnames`) that
-print a short message describing what each operation did and then dispatch to
-the 'data.table' implementation. Attaching the package therefore masks those
-'data.table' functions, which is by design and is documented in the package
-help and README. The underlying behaviour, including modification by reference,
-is unchanged; `tests/testthat/test-parity.R` and
-`tests/testthat/test-no-side-effects.R` verify that results are identical to
-plain 'data.table'. The latter also verifies that every argument a wrapper has
-to read in order to describe the call -- `which=`, `with=`, the computed left
-hand side of a `(cols) :=`, `merge()`'s `by=` and `all*=`, `na.omit()`'s
-`invert=`, `set()`'s `j=`, `setorderv()`'s `cols=` and `setattr()`'s `name=` --
-is evaluated exactly once, as often as 'data.table' evaluates it, so an
-argument written as an expression with a side effect behaves the same with and
-without 'dtlog'. This mirrors the approach taken by the 'tidylog' package,
-which is already on CRAN.
+As in 0.1.0, 'dtlog' intentionally provides wrappers around functions exported
+by 'data.table' that print a short message describing what each operation did
+and then dispatch to the 'data.table' implementation. Attaching the package
+therefore masks those 'data.table' functions, which is by design and is
+documented in the package help and README. The new wrappers in 0.2.0 follow
+the same pattern and are covered by the same parity tests
+(`tests/testthat/test-parity.R`, `tests/testthat/test-functions-parity.R`),
+which check that results are identical to plain 'data.table'.
 
-The package also provides `dttable()`, which describes a single 'data.table'
-(one row per column, with the number of unique values and the values
-themselves). `dttable()` is a function of its own and masks nothing: no
-function in 'base' is affected by attaching 'dtlog'. Every call that is not a
-single 'data.table' is passed on to `base::table()` unchanged, and
-`tests/testthat/test-dttable.R` checks that those calls return exactly what
-`base::table()` returns.
-
-The package writes no files and changes no global options on load. Logging can
-be turned off with `dtlog_pause()`.
+The package writes no files except to the path a user passes to `dt_log()`
+(which has no default), and changes no global options on load.
 
 ## Downstream dependencies
 
